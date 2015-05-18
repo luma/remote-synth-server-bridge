@@ -1,0 +1,20 @@
+{
+  "name": "remote-synth-server-bridge",
+  "version": "0.0.1",
+  "description": "A native bridge based on WebRTC for remote sync server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jraoult/remote-synth-server-bridge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jraoult/remote-synth-server-bridge/issues"
+  },
+  "homepage": "https://github.com/jraoult/remote-synth-server-bridge",
+  "gypfile": true
+}
