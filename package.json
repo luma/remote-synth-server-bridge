@@ -15,5 +15,6 @@
   "bugs": {
     "url": "https://github.com/jraoult/remote-synth-server-bridge/issues"
   },
-  "homepage": "https://github.com/jraoult/remote-synth-server-bridge"
+  "homepage": "https://github.com/jraoult/remote-synth-server-bridge",
+  "gypfile": true
 }
