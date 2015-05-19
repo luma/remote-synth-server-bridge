@@ -2,8 +2,13 @@
   "name": "remote-synth-server-bridge",
   "version": "0.0.1",
   "description": "A native bridge based on WebRTC for remote sync server",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
+    "preinstall": "npm run pullWebrtc && npm run buildWebrtcRelease",
+    "build": "node-gyp --debug rebuild",
+    "pullWebrtc": "node scripts/pullWebrtc.js",
+    "buildWebrtcDebug": "cd ext/webrtc/src && ninja -C out/Debug",
+    "buildWebrtcRelease": "cd ext/webrtc/src && ninja -C out/Release",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,10 +16,39 @@
     "url": "https://github.com/jraoult/remote-synth-server-bridge.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jraoult/remote-synth-server-bridge/issues"
   },
   "homepage": "https://github.com/jraoult/remote-synth-server-bridge",
-  "gypfile": true
+  "gypfile": true,
+  "dependencies": {
+    "fs-extra": "^0.18.3",
+    "cross-spawn": "^0.1.7",
+    "q": "^1.0.1"
+  },
+  "jshintConfig": {
+    "globals": {
+      "require": true,
+      "console": true,
+      "process": true
+    },
+    "globalstrict": true,
+    "browser": true,
+    "esnext": true,
+    "strict": false,
+    "camelcase": true,
+    "eqeqeq": true,
+    "eqnull": true,
+    "expr": true,
+    "indent": 2,
+    "latedef": true,
+    "maxlen": 100,
+    "newcap": true,
+    "quotmark": "single",
+    "smarttabs": true,
+    "trailing": true,
+    "undef": true,
+    "unused": true
+  }
 }
