@@ -35,8 +35,8 @@ bool Peer::CreatePeerConnection() {
 
   pc_ = pcFactory_->CreatePeerConnection(servers,
                                          &constraints,
-                                         NULL,
-                                         NULL,
+                                         NULL,            // allocator_factory
+                                         NULL,            // IdentityService
                                          this);
 
   negotiator_->SetPC(pc_);
