@@ -16,7 +16,7 @@
   }
 
   if(!fs.existsSync(webrtcDir)) {
-    fs.mkdirSync(webrtcDir);
+    fs.mkdirsSync(webrtcDir);
     console.log('Fetching webrtc...');
     tasks = spawnCommand('fetch', ['webrtc'], webrtcDir);
   }
