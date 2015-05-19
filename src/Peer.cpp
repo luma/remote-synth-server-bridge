@@ -4,7 +4,6 @@
 #include "Peer.h"
 
 bool Peer::Connect(NegotiationInterface *negotiation) {
-  return true;
   if (!CreatePeerConnection()) {
     // @todo something?
     return false;
