@@ -2,12 +2,13 @@
 
 #include "base/logging.h"
 #include "base/ssladapter.h"
+#include "webrtc/system_wrappers/interface/field_trial_default.h"
 
 #include "PeerWrapper.h"
 
 using namespace v8;
 
-static const char *fieldTrials = NULL;
+static const char *fieldTrials = std::string("").c_str();
 
 void SetupWebRtc() {
   webrtc::field_trial::InitFieldTrialsFromString(fieldTrials);

@@ -4,14 +4,20 @@
 
 #include <string>
 #include <node.h>
+#include "CommonV8.h"
 #include "NegotiationInterface.h"
 
 using namespace v8;
 
+// class Callback {
+//  public:
+//   Callback
+// };
+
 // Bridges NegotationInterface with Node.js land
 class NegotiationInterfaceWrapper : public NegotiationInterface {
  public:
-  explicit NegotiationInterfaceWrapper(Local<Function> callback)
+  explicit NegotiationInterfaceWrapper(PersistentFunction callback)
     : callback_(callback) {}
 
   virtual ~NegotiationInterfaceWrapper() {}
@@ -22,7 +28,6 @@ class NegotiationInterfaceWrapper : public NegotiationInterface {
 
     RespondWith("candidate", sdp);
   }
-
 
   virtual void OnOffer(webrtc::SessionDescriptionInterface* desc) {
     RespondWith(desc);
@@ -55,10 +60,33 @@ class NegotiationInterfaceWrapper : public NegotiationInterface {
       String::NewFromUtf8(isolate, sdp.c_str(), String::kNormalString, sdp.length()));
 
     Local<Value> argv[argc] = { obj };
-    callback_->Call(isolate->GetCurrentContext()->Global(), argc, argv);
+    // callback_.Call(isolate->GetCurrentContext()->Global(), argc, argv);
+
+    // Create a handle scope to keep the temporary object references.
+    // v8::HandleScope localHandleScope(isolate);
+
+    // Enter the new execution context before evaluating any code so that
+    // all the remaining operations take place there
+    // v8::Context::Scope contextScope(isolate->GetCurrentContext());
+
+    // Invoke the process function, giving the global object as 'this'
+    // and whatever arguments were passed in
+    auto callableFn = v8::Local<v8::Function>::New(isolate, callback_);
+
+    {
+      // Set up an exception handler before calling the handler function
+      v8::TryCatch tryCatch;
+
+      callableFn->Call(isolate->GetCurrentContext()->Global(), argc, argv);
+
+      if (tryCatch.HasCaught()) {
+        // @todo do something
+      }
+    }
+
   }
 
-  Local<Function> callback_;
+  PersistentFunction callback_;
 };
 
 #endif     // NEGOTIATION_INTERFACE_WRAPPER_H_

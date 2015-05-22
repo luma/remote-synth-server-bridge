@@ -25,6 +25,7 @@
   "dependencies": {
     "fs-extra": "^0.18.3",
     "cross-spawn": "^0.1.7",
+    "segfault-handler": "~0.2.4",
     "q": "^1.0.1"
   },
   "jshintConfig": {

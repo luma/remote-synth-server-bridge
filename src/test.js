@@ -1,3 +1,5 @@
+require('segfault-handler').registerHandler();
+
 var SynthBridge = require('../build/Debug/SynthBridge'),
     // MediaDevices = SynthBridge.MediaDevices,
     peer = new SynthBridge.Peer();
