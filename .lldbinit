@@ -1,0 +1,14 @@
+#settings set prompt '[lldb]$ '
+#command script import ext/lldb-v8/v8.py
+
+# breakpoint shortcuts
+# break on function/method/selector: b -n name
+# break on C/C++ method: b -M method
+# break on selector: b -S selector:here:
+# break on address: b -a 0xfeedface
+command alias b breakpoint set
+command alias bd breakpoint disable
+command alias be breakpoint enable
+command alias bdel breakpoint delete
+command alias bcommand breakpoint command add
+command alias commands breakpoint command list

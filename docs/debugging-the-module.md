@@ -1,12 +1,38 @@
 # Debugging the Module
 
-## Using GDB
+## Ensure that you have the debug version of Node installed.
 
-### 0. Ensure that you have the debug version of Node installed.
-
+If you've on a Mac, and you used Homebrew to install Node, then you can run something like the following.
 ```
 brew reinstall node --with-debug --with-openssl --with-icu4c
 ```
+
+
+## Using LLDB
+
+LLDB is basically GDB for the LLVM toolchain. It's also what Apple wants you to use as the newer versions of Mac OSX (Yosemite and above) don't have GDB out of the box.
+
+TODO: Write up how to use LLDB
+      http://lldb.llvm.org/tutorial.html
+      http://lldb.llvm.org/scripting.html
+      http://lldb.llvm.org/lldb-gdb.html
+TODO: ext/lldb-v8
+
+### 1. Build the module
+
+```
+npm run build
+```
+
+### 2.  Run LLDB
+
+```
+lldb -- node src/test.js
+```
+
+
+## Using GDB
+
 
 ### 1. Build the module
 
