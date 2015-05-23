@@ -39,13 +39,6 @@
         '-std=c++11'
       ],
       'xcode_settings': {
-        'OTHER_CFLAGS': [
-#          '-std=gnu++0x',
-#          '-stdlib=libc++',
-          '-Wno-c++0x-extensions',
-          '-Wno-c++11-extensions',
-          '-mmacosx-version-min=10.7',
-        ],
         'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
         'OTHER_LDFLAGS': ['-stdlib=libc++'],
         'MACOSX_DEPLOYMENT_TARGET': '10.7',
