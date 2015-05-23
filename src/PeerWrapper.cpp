@@ -4,11 +4,13 @@ using namespace v8;
 
 Persistent<Function> PeerWrapper::constructor;
 
-PeerWrapper::PeerWrapper() : peer_(new Peer()) {}
+PeerWrapper::PeerWrapper()
+  : peer_(new Peer()) {}
+     // loop_(uv_default_loop()) {}
 
 PeerWrapper::~PeerWrapper() {
-  negotiation_ = NULL;
-  peer_ = NULL;
+  negotiation_ = nullptr;
+  peer_ = nullptr;
 }
 
 void PeerWrapper::Init(Handle<Object> exports) {
@@ -65,8 +67,13 @@ void PeerWrapper::Connect(const FunctionCallbackInfo<Value>& args) {
 
   PeerWrapper* obj = ObjectWrap::Unwrap<PeerWrapper>(args.Holder());
 
-  bool success = obj->peer_->Connect(
-            new NegotiationInterfaceWrapper(Local<Function>::Cast(args[0])));
+  // get callback argument. It is a function; cast it to a Function and store the
+  // function in a Persistent handle, since we also want that to remain after
+  // this call returns
+  PersistentFunction fn = PersistentFunction::Persistent(isolate,
+                                          Handle<Function>::Cast(args[0]));
+
+  bool success = obj->peer_->Connect(new NegotiationInterfaceWrapper(fn));
 
   args.GetReturnValue().Set(Number::New(isolate, success));
 }

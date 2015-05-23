@@ -5,6 +5,7 @@
 #include <node_object_wrap.h>
 
 #include "Peer.h"
+#include "CommonV8.h"
 #include "NegotiationInterfaceWrapper.h"
 
 class PeerWrapper : public node::ObjectWrap {
@@ -25,6 +26,7 @@ class PeerWrapper : public node::ObjectWrap {
 
   std::unique_ptr<Peer> peer_;
   std::shared_ptr<NegotiationInterfaceWrapper> negotiation_;
+  // uv_loop_t *loop_;
 };
 
 #endif    // SYNTH_BRIDGE_PEER_WRAPPER_H_

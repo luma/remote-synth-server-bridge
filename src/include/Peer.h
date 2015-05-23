@@ -24,7 +24,9 @@ class Peer
   : public webrtc::PeerConnectionObserver {
 
 public:
-  Peer() : negotiator_(new Negotiator()) {}
+  Peer()
+    : negotiator_(new Negotiator()) {}
+
   ~Peer() {}
 
   bool Connect(NegotiationInterface *negotiation);

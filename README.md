@@ -13,19 +13,24 @@ You'll need XCode 3.0 or higher. You'll also need to install the [Depot Tools](h
 #### Get/Update Webrtc
 
 ```
-npm run pullWebrtc
+./webrtc fetch
+```
+
+Or to fetch a specific branch
+```
+./webrtc fetch fooBranch
 ```
 
 #### Build Webrtc
 
 Debug mode
 ```
-npm run buildWebrtcDebug
+./webrtc build
 ```
 
 Release mode
 ```
-npm run buildWebrtcRelease
+./webrtc build Release
 ```
 
 ### Build the Node module

@@ -15,7 +15,7 @@ void Negotiator::CreateOffer() {
     });
   });
 
-  pc_->CreateOffer(createSDPObserver_, NULL /* mediaConstraints */);
+  pc_->CreateOffer(createSDPObserver_, nullptr /* mediaConstraints */);
 }
 
 void Negotiator::AddRemoteAnswer(const std::string &sdp) {
@@ -39,9 +39,9 @@ webrtc::SessionDescriptionInterface* Negotiator::ParseSDP(const std::string &typ
   webrtc::SessionDescriptionInterface* sdp
             = webrtc::CreateSessionDescription(type, sdpText, &parseErr);
 
-  if (NULL == sdp) {
+  if (nullptr == sdp) {
     // @todo do something with parseErr.line and parseErr.description
-    return NULL;
+    return nullptr;
   }
 
   return sdp;

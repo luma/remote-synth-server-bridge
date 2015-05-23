@@ -11,36 +11,47 @@ bool Peer::Connect(NegotiationInterface *negotiation) {
 
   StartNegotation(negotiation);
 
-  return pc_.get() != NULL;
+  return nullptr != pc_.get();
 }
 
 bool Peer::CreatePeerConnection() {
-  ASSERT(pcFactory_.get() == NULL);
+  ASSERT(nullptr == pcFactory_.get());
   pcFactory_  = webrtc::CreatePeerConnectionFactory();
 
   if (!pcFactory_.get()) {
     // @todo some crazy shit
   }
 
-  ASSERT(pc_.get() == NULL);
+  ASSERT(nullptr == pc_.get());
 
-  webrtc::PeerConnectionInterface::IceServers servers;
-  webrtc::PeerConnectionInterface::IceServer server;
-  server.uri = "stun:stun.l.google.com:19302";
-  servers.push_back(server);
+  // @fixme disabled this for now, it causes it to segfault (11)
+  // webrtc::PeerConnectionInterface::IceServers servers;
+  // webrtc::PeerConnectionInterface::IceServer server;
+  // server.uri = "stun:stun.l.google.com:19302";
+  // servers.push_back(server);
 
+  webrtc::PeerConnectionInterface::RTCConfiguration config;
+  // config.servers = servers;
+
+  // DTLS-SRTP is the preferred encryption method. If set to kValueFalse, the
+  // peer connection uses SDES. Disabling SDES as well will cause the peer
+  // connection to fail to connect.
+  //
+  // Be aware that Web Browsers only implement DTLS, so you'll need to use that
+  // if you want to interopt with them.
+  //
   webrtc::FakeConstraints constraints;
-  constraints.AddOptional(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
-                          "true");
+  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
+                           webrtc::MediaConstraintsInterface::kValueTrue);
 
-  pc_ = pcFactory_->CreatePeerConnection(servers,
+  pc_ = pcFactory_->CreatePeerConnection(config,
                                          &constraints,
-                                         NULL,
-                                         NULL,
+                                         nullptr,            // allocator_factory
+                                         nullptr,            // IdentityService
                                          this);
 
   negotiator_->SetPC(pc_);
-  return NULL != pc_.get();
+  return nullptr != pc_.get();
 }
 
 void Peer::StartNegotation(NegotiationInterface *negotiationCallback) {
@@ -57,11 +68,10 @@ void Peer::AddRemoteCandidate(const std::string &mid, unsigned short mLineIndex,
   negotiator_->AddIceCandidate(candidate);
 }
 
-
 void Peer::Cleanup() {
-  negotiator_ = NULL;
-  pc_ = NULL;
-  pcFactory_ = NULL;
+  negotiator_ = nullptr;
+  pc_ = nullptr;
+  pcFactory_ = nullptr;
 }
 
 //
