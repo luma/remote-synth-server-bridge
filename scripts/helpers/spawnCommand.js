@@ -1,51 +1,52 @@
 'use strict';
 
-var crossSpawn = require('../../node_modules/cross-spawn'),
-    q = require('../../node_modules/q');
+var crossSpawn = require('cross-spawn'),
+    Promise = require("bluebird");;
 
 exports.spawnCommand = function(cmd, args, cwd) {
-  var deferred = q.defer(),
-      stdout = '',
-      stderr = '';
+  return new Promise(function(resolve, reject) {
+    var stdout = '',
+        stderr = '';
 
-  var process = crossSpawn(cmd, args, {cwd: cwd});
-  process.stdout.on('data', function (data) {
-    stdout += data;
-  });
+    var process = crossSpawn(cmd, args, {cwd: cwd});
+    process.stdout.on('data', function (data) {
+      stdout += data;
+      console.log(data.toString());
+    });
 
-  process.stderr.on('data', function (data) {
-    stderr += data;
-  });
+    process.stderr.on('data', function (data) {
+      stderr += data;
+      console.error(data.toString());
+    });
 
-  var reject = function(fullCmd, errorMessage) {
-    var error = new Error('Failed to execute command "' + fullCmd +
-                              '" in "' + cwd +
-                              '", failed with error ' + errorMessage);
-    error.code = errorMessage;
-    error.details = stdout + '\n\n' + stderr;
-    return deferred.reject(error);
-  };
+    var rejectWithError = function(fullCmd, errorMessage) {
+      var error = new Error('Failed to execute command "' + fullCmd +
+                                '" in "' + cwd +
+                                '", failed with error ' + errorMessage);
+      error.code = errorMessage;
+      error.details = stdout + '\n\n' + stderr;
+      return reject(error);
+    };
 
-  // If there is an error spawning the command, reject the promise
-  process.on('error', function (errorMessage) {
-    var fullCmd = [cmd];
-    if (args) fullCmd.push(args.slice());
-    fullCmd = fullCmd.join(' ');
-
-    return reject(fullCmd, errorMessage);
-  });
-
-  process.on('close', function (code) {
-    if (code) {
+    // If there is an error spawning the command, reject the promise
+    process.on('error', function (errorMessage) {
       var fullCmd = [cmd];
-      if (args) fullCmd.push(args.slice());
+      if (args) fullCmd.push.apply(fullCmd, args.slice());
       fullCmd = fullCmd.join(' ');
 
-      return reject(fullCmd, code);
-    }
+      return rejectWithError(fullCmd, errorMessage);
+    });
 
-    deferred.resolve(stdout);
+    process.on('close', function (code) {
+      if (code) {
+        var fullCmd = [cmd];
+        if (args) fullCmd.push.apply(fullCmd, args.slice());
+        fullCmd = fullCmd.join(' ');
+
+        return rejectWithError(fullCmd, code);
+      }
+
+      resolve(stdout);
+    });
   });
-
-  return deferred.promise;
 };

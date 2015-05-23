@@ -1,27 +1,19 @@
 {
-  "name": "remote-synth-server-bridge",
+  "name": "remote-synth-server-bridge-scripts",
   "version": "0.0.1",
-  "description": "A native bridge based on WebRTC for remote sync server",
-  "main": "lib/index.js",
-  "scripts": {
-    "preinstall": "cd scripts/ && npm install && cd ../ && ./webrtc fetch",
-    "build": "node-gyp --debug rebuild",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jraoult/remote-synth-server-bridge.git"
-  },
+  "description": "Helpers",
+  "private": true,
+  "scripts": {},
   "author": "",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jraoult/remote-synth-server-bridge/issues"
   },
   "homepage": "https://github.com/jraoult/remote-synth-server-bridge",
-  "gypfile": true,
   "dependencies": {
-    "commander": "2.8.1",
-    "segfault-handler": "~0.2.4"
+    "fs-extra": "^0.18.3",
+    "cross-spawn": "^0.1.7",
+    "bluebird": "~2.9.25"
   },
   "jshintConfig": {
     "globals": {
