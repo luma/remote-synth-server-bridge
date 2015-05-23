@@ -29,3 +29,5 @@ node_modules
 # OSX's beloved ubiquitous desktop services store
 .DS_Store
 
+# ignore webrtc, that's separate from this repo
+ext/webrtc
