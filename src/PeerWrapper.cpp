@@ -27,9 +27,9 @@ void PeerWrapper::Init(Handle<Object> exports) {
   // NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteCandidate", AddRemoteCandidate);
 
   constructor.Reset(isolate, tpl->GetFunction());
-  exports->Set(String::NewFromUtf8(isolate, "Peer"),
-               tpl->GetFunction());
+  exports->Set(String::NewFromUtf8(isolate, "Peer"), tpl->GetFunction());
 }
+
 
 void PeerWrapper::New(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = Isolate::GetCurrent();
@@ -74,6 +74,9 @@ void PeerWrapper::Connect(const FunctionCallbackInfo<Value>& args) {
                                           Handle<Function>::Cast(args[0]));
 
   bool success = obj->peer_->Connect(new NegotiationInterfaceWrapper(fn));
+
+  // @todo handle failure cases
+  //     return v8::ThrowException(v8::Exception::Error(String::New("Can't create the PeerConnectionFactory")));
 
   args.GetReturnValue().Set(Number::New(isolate, success));
 }

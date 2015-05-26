@@ -11,6 +11,10 @@ var SynthBridge = require('../build/Debug/SynthBridge'),
 //   // you would enumerate devices here
 // });
 
-peer.connect(function(event) {
+peer.onSignal(function(event) {
   console.log(event);
 });
+
+setTimeout(function() {
+  peer = null;
+}, 10000);

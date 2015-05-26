@@ -30,6 +30,14 @@ npm run build
 lldb -- node src/test.js
 ```
 
+### 3. Enable Guard Malloc on MacOS (optional)
+
+```
+env DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib
+```
+
+Info on Guard Malloc is on [developer.apple.com](https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man3/libgmalloc.3.html#//apple_ref/doc/man/3/libgmalloc).
+
 
 ## Using GDB
 

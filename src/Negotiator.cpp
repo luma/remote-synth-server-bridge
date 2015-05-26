@@ -1,7 +1,9 @@
 #include "Negotiator.h"
 
-void Negotiator::AddIceCandidate (const webrtc::IceCandidateInterface *candidate)
+void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp)
 {
+  webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(mid, mLineIndex, sdp);
+
   if (!pc_->AddIceCandidate(candidate)) {
     // @todo something something error
     return;
@@ -9,9 +11,15 @@ void Negotiator::AddIceCandidate (const webrtc::IceCandidateInterface *candidate
 }
 
 void Negotiator::CreateOffer() {
+  // @fixme code smell. I need to explicitly capture desc otherwise
+  // I end up with invalid pointer?
+  // Negotiator *self = this;
+
   createSDPObserver_->SetCallback([&] (webrtc::SessionDescriptionInterface* desc) {
-    SetLocalDescription(desc, [&] {
-      callback_->OnOffer(desc);
+    SetLocalDescription(desc, [eventHandler = std::move(eventHandler_),desc = std::move(desc)] {
+      if (nullptr != eventHandler) {
+        eventHandler->OnLocalOffer(desc);
+      }
     });
   });
 
@@ -21,10 +29,6 @@ void Negotiator::CreateOffer() {
 void Negotiator::AddRemoteAnswer(const std::string &sdp) {
   std::string type = "answer";
   webrtc::SessionDescriptionInterface* desc = ParseSDP(type, sdp);
-
-  setRemoteSDPObserver_->SetCallback([&] {
-    callback_->OnAnswer(desc);
-  });
 
   pc_->SetLocalDescription(setRemoteSDPObserver_.get(), desc);
 }

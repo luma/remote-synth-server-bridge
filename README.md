@@ -39,3 +39,13 @@ Release mode
 npm build
 ```
 
+
+## TIPs
+
+### Forcing node-gyp to generate an XCode project
+
+The xcodeproj will be created in build/ when you run the following:
+```
+node-gyp configure -- -f xcode
+xcodebuild -project ./build/binding.xcodeproj
+```

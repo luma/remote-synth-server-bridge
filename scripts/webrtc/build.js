@@ -10,6 +10,7 @@ var projectDir = path.dirname(path.dirname(path.dirname(fs.realpathSync(__filena
     srcDir = projectDir + '/ext/webrtc/src',
     repo = 'https://github.com/luma/webrtc.git';
 
+path.dirname(fs.realpathSync(__filename))
 
 function onError(err) {
   console.error('ERROR:', err.message, '(' + err.code + ')', '\n');

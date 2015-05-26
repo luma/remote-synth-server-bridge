@@ -2,18 +2,30 @@
 
 #include "base/logging.h"
 #include "base/ssladapter.h"
-#include "webrtc/system_wrappers/interface/field_trial_default.h"
+// #include "webrtc/system_wrappers/interface/field_trial_default.h"
+#include "webrtc/system_wrappers/interface/field_trial.h"
 
-#include "PeerWrapper.h"
+#include "Peer.h"
 
-using namespace v8;
+// static const char kFieldTrials[] = "";
 
-static const char *fieldTrials = std::string("").c_str();
+
+
+// Clients of webrtc that do not want to configure field trials can link with
+// this instead of providing their own implementation.
+namespace webrtc {
+namespace field_trial {
+  std::string FindFullName(const std::string& name) {
+    return std::string();
+  }
+}  // namespace field_trial
+}  // namespace webrtc
+
 
 void SetupWebRtc() {
-  webrtc::field_trial::InitFieldTrialsFromString(fieldTrials);
+  // webrtc::field_trial::InitFieldTrialsFromString(nullptr);
 
-  if (!rtc::InitializeSSL(NULL)) {
+  if (!rtc::InitializeSSL()) {
     // @todo log error "Failed to initialise SSL";
     // @todo something?
     return;
@@ -42,20 +54,10 @@ void TearDownWebRtc() {
   }
 }
 
-
-
-void CreatePeer(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = Isolate::GetCurrent();
-  HandleScope scope(isolate);
-  PeerWrapper::NewInstance(args);
-}
-
-void InitAll(Handle<Object> exports) {
+void InitAll(v8::Handle<v8::Object> exports) {
   SetupWebRtc();
 
-  PeerWrapper::Init(exports);
-
-  NODE_SET_METHOD(exports, "Peer", CreatePeer);
+  Peer::Init(exports);
 }
 
 NODE_MODULE(SynthBridge, InitAll)
