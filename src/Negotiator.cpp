@@ -11,12 +11,11 @@ void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineInd
 }
 
 void Negotiator::CreateOffer() {
-  // @fixme code smell. I need to explicitly capture desc otherwise
-  // I end up with invalid pointer?
-  // Negotiator *self = this;
-
   createSDPObserver_->SetCallback([&] (webrtc::SessionDescriptionInterface* desc) {
-    SetLocalDescription(desc, [eventHandler = std::move(eventHandler_),desc = std::move(desc)] {
+    SetLocalDescription(desc, [
+      eventHandler = std::move(eventHandler_),
+      desc = std::move(desc)
+    ] {
       if (nullptr != eventHandler) {
         eventHandler->OnLocalOffer(desc);
       }

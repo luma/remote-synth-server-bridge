@@ -141,7 +141,7 @@ void Peer::Close(const v8::FunctionCallbackInfo<v8::Value>& args) {
     self->pc_->Close();
   }
 
-  // args.GetReturnValue().Set(Boolean::New(isolate, true));
+  args.GetReturnValue().Set(v8::Undefined(isolate));
 }
 
 void Peer::BindToSignals(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -293,10 +293,11 @@ void Peer::Run(uv_async_t* handle, int status) {
 // PeerConnectionObserver implementation.
 //
 
-void Peer::OnStateChange(webrtc::PeerConnectionObserver::StateType stateChanged) {
-  StateEvent* data = new StateEvent(static_cast<uint32_t>(stateChanged));
+void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState newState) {
+  StateEvent* data = new StateEvent(static_cast<uint32_t>(newState));
   QueueEvent(Peer::EVENT_SIGNALING_STATE_CHANGE, static_cast<void*>(data));
 }
+
 
 void Peer::OnAddStream(webrtc::MediaStreamInterface* stream) {
   // push into event queue
@@ -333,13 +334,14 @@ void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
 void Peer::OnLocalOffer(webrtc::SessionDescriptionInterface* desc) {
   std::string sdp;
   desc->ToString(&sdp);
-  INFO(sdp.c_str());
   SdpEvent* data = new SdpEvent(desc->type(), sdp);
   QueueEvent(Peer::EVENT_HAS_SESSION_DESC, static_cast<void*>(data));
 }
 
 
 void Peer::EmitEvent(const std::string &type, const std::string &sdp) {
+  INFO((std::string("EmitEvent: ") + type + "\n" + sdp).c_str());
+
   Isolate* isolate = Isolate::GetCurrent();
   const unsigned argc = 1;
 

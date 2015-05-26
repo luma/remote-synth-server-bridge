@@ -41,7 +41,7 @@ public:
   //
   // PeerConnectionObserver implementation.
   //
-  virtual void OnStateChange(webrtc::PeerConnectionObserver::StateType state_changed);
+  virtual void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState newState);
   virtual void OnAddStream(webrtc::MediaStreamInterface* stream);
   virtual void OnRemoveStream(webrtc::MediaStreamInterface* stream);
   virtual void OnDataChannel(webrtc::DataChannelInterface* channel);
