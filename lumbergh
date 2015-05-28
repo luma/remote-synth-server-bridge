@@ -1,0 +1,85 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var installOptions = ['arch', 'platform', 'revision', 'chromeVersion', 'config'];
+var Prebuilt = require('./scripts/webrtc/Prebuilt');
+// var fetchWebrtc = require('./scripts/webrtc/fetch');
+// var buildWebrtc = require('./scripts/webrtc/build');
+
+function normalisePrebuiltOptions(inputOpts) {
+  var options = {};
+  for (var key in inputOpts) {
+    if (installOptions.indexOf(key) > -1) {
+      options[key] =  inputOpts[key];
+    }
+  }
+
+  // We use 'osx' instead of 'darwin'
+  if (options.platform === 'darwin') options.platform = 'osx';
+
+  if (options.chromeVersion) {
+    // there's a naming clash with Commander with 'version'
+    options.version = options.chromeVersion;
+    delete options.chromeVersion;
+  }
+
+  return options;
+}
+
+program
+  .version(require('./package.json').version)
+  .option('-v, --verbose', 'output copious amounts of useful debug output when running');
+
+program
+  .command('install [installDir]')
+  .option('-a, --arch <arch>', null, process.arch)
+  .option('-p, --platform <platform>', null, process.platform)
+  .option('-r, --revision <revision>')
+  .option('--chromeVersion <chromeVersion>')
+  .option('-c, --config <config>', null, 'Debug')
+  .description('Fetch or update a specific branch of WebRTC')
+  .action(function(installDir, inputOpts) {
+    return Prebuilt.get(normalisePrebuiltOptions(inputOpts)).then(function(prebuilt) {
+      prebuilt.install(installDir);
+    }).catch(function(err) {
+      console.error(err);
+    });
+  });
+
+program
+  .command('info')
+  .option('-a, --arch <arch>', null, process.arch)
+  .option('-p, --platform <platform>', null, process.platform)
+  .option('-r, --revision <revision>')
+  .option('--chromeVersion <chromeVersion>')
+  .option('-c, --config <config>', null, 'Debug')
+  .description('Fetch or update a specific branch of WebRTC')
+  .action(function(inputOpts) {
+    return Prebuilt.get(normalisePrebuiltOptions(inputOpts)).then(function(prebuilt) {
+      if (typeof prebuilt === 'undefined') {
+        console.error('Could not find a Prebuilt with those options');
+      } else {
+        console.log(prebuilt.toString());
+      }
+    }).catch(function(err) {
+      console.error(err);
+    });
+  });
+
+
+// program
+//   .command('fetch [config]')
+//   .description('Fetch the WebRTC source using the desired config (Debug or Release)')
+//   .action(build);
+
+// program
+//   .command('build [config]')
+//   .description('Build the WebRTC source using the desired config (Debug or Release)')
+//   .action(build);
+
+
+program.parse(process.argv);
+if (!program.args.length) program.help();
+
+
+
