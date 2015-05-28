@@ -3,10 +3,15 @@
 var crossSpawn = require('cross-spawn'),
     Promise = require("bluebird");;
 
-exports.spawnCommand = function(cmd, args, cwd) {
+module.exports = function(cmd, args, cwd) {
   return new Promise(function(resolve, reject) {
     var stdout = '',
         stderr = '';
+
+    var fullCmd = [cmd];
+    if (args) fullCmd.push.apply(fullCmd, args.slice());
+    fullCmd = fullCmd.join(' ');
+    console.log('\n', fullCmd);
 
     var process = crossSpawn(cmd, args, {cwd: cwd});
     process.stdout.on('data', function (data) {

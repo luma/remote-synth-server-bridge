@@ -1,7 +1,9 @@
 'use strict';
 
+//// DO NOT USE: TOTALLY OUT OF DATE
+
 var fs = require('fs-extra'),
-    spawnCommand = require('../helpers/spawnCommand').spawnCommand,
+    spawnCommand = require('../helpers/spawnCommand'),
     path = require('path');
 
 var DEFAULT_CONFIG = 'Debug';

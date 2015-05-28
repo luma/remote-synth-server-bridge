@@ -11,13 +11,13 @@ void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineInd
 }
 
 void Negotiator::CreateOffer() {
-  createSDPObserver_->SetCallback([&] (webrtc::SessionDescriptionInterface* desc) {
-    SetLocalDescription(desc, [
-      eventHandler = std::move(eventHandler_),
-      desc = std::move(desc)
+  createSDPObserver_->SetCallback([this] (auto description) {
+    SetLocalDescription(description, [
+      eventHandler = std::move(this->eventHandler_),
+      description = std::move(description)
     ] {
-      if (nullptr != eventHandler) {
-        eventHandler->OnLocalOffer(desc);
+      if (eventHandler) {
+        eventHandler->OnLocalOffer(description);
       }
     });
   });
