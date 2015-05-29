@@ -15,7 +15,7 @@ Peer::Peer()
 
   if (!pcFactory_.get()) {
     // @todo some crazy shit
-    return ;
+    return;
   }
 
   uv_mutex_init(&lock_);
@@ -80,8 +80,7 @@ void Peer::NewInstance(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(instance);
 }
 
-void Peer::QueueEvent(AsyncEventType type, void* data)
-{
+void Peer::QueueEvent(AsyncEventType type, void* data) {
   AsyncEvent event = {type, data};
 
   uv_mutex_lock(&lock_);
@@ -112,20 +111,20 @@ bool Peer::CreatePeerConnection() {
   // if you want to interopt with them.
   //
   webrtc::FakeConstraints constraints;
-  // // constraints.AddMandatory(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
-  // //                          webrtc::MediaConstraintsInterface::kValueTrue);
+  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
+                           webrtc::MediaConstraintsInterface::kValueTrue);
 
-  // // // @fixme things get explodey without these constraints. I'm not sure why yet
-  // // constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveAudio,
-  // //                          webrtc::MediaConstraintsInterface::kValueFalse);
-  // // constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveVideo,
-  // //                          webrtc::MediaConstraintsInterface::kValueFalse);
+  // @fixme things get explodey without these constraints. I'm not sure why yet
+  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveAudio,
+                           webrtc::MediaConstraintsInterface::kValueFalse);
+  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveVideo,
+                           webrtc::MediaConstraintsInterface::kValueFalse);
 
   pc_ = pcFactory_->CreatePeerConnection(config,
-                                         nullptr, //&constraints,
-                                         nullptr,            // allocator_factory
-                                         nullptr,            // IdentityService
-                                         this);
+                       &constraints,
+                       nullptr,            // allocator_factory
+                       nullptr,            // IdentityService
+                       this);
 
   negotiator_->SetPC(pc_);
   return nullptr != pc_.get();
@@ -150,9 +149,9 @@ void Peer::BindToSignals(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   Peer* self = ObjectWrap::Unwrap<Peer>(args.Holder());
 
-  // get callback argument. It is a function; cast it to a Function and store the
-  // function in a Persistent handle, since we also want that to remain after
-  // this call returns
+  // get callback argument. It is a function; cast it to a Function and
+  // store the function in a Persistent handle, since we also want that
+  // to remain after this call returns
   self->eventHandler_ = PersistentFunction::Persistent(isolate,
                                             Handle<Function>::Cast(args[0]));
 
@@ -199,10 +198,10 @@ void Peer::Run(uv_async_t* handle, int status) {
   Peer* self = static_cast<Peer*>(handle->data);
   bool doShutdown = false;
 
-  while(true) {
+  while (true) {
     uv_mutex_lock(&self->lock_);
 
-    if(self->events_.empty()) {
+    if (self->events_.empty()) {
       uv_mutex_unlock(&self->lock_);
       break;
     }
@@ -211,7 +210,7 @@ void Peer::Run(uv_async_t* handle, int status) {
     self->events_.pop();
     uv_mutex_unlock(&self->lock_);
 
-    switch(event.type) {
+    switch (event.type) {
       case EVENT_INIT:
         INFO("EVENT_INIT");
         if (!self->CreatePeerConnection()) {
@@ -227,7 +226,7 @@ void Peer::Run(uv_async_t* handle, int status) {
         {
           Peer::StateEvent* data = static_cast<Peer::StateEvent*>(event.data);
 
-          if(webrtc::PeerConnectionInterface::kClosed == data->state) {
+          if (webrtc::PeerConnectionInterface::kClosed == data->state) {
             doShutdown = true;
           }
         }
@@ -281,9 +280,9 @@ void Peer::Run(uv_async_t* handle, int status) {
     }
   }
 
-  if(doShutdown) {
+  if (doShutdown) {
     INFO("Shutting down event loop");
-    uv_close((uv_handle_t*)(&self->async_), NULL);
+    uv_close((uv_handle_t*) &self->async_, NULL);
   }
 
   INFO("EXITING PEER::RUN");
@@ -347,10 +346,12 @@ void Peer::EmitEvent(const std::string &type, const std::string &sdp) {
 
   Local<Object> obj = Object::New(isolate);
   obj->Set(String::NewFromUtf8(isolate, "type"),
-    String::NewFromUtf8(isolate, type.c_str(), String::kNormalString, type.length()));
+            String::NewFromUtf8(isolate, type.c_str(),
+                    String::kNormalString, type.length()));
 
   obj->Set(String::NewFromUtf8(isolate, "sdp"),
-    String::NewFromUtf8(isolate, sdp.c_str(), String::kNormalString, sdp.length()));
+            String::NewFromUtf8(isolate, sdp.c_str(),
+                      String::kNormalString, sdp.length()));
 
   Local<Value> argv[argc] = { obj };
   // callback_.Call(isolate->GetCurrentContext()->Global(), argc, argv);
@@ -376,5 +377,4 @@ void Peer::EmitEvent(const std::string &type, const std::string &sdp) {
       // @todo do something
     }
   }
-
 }
