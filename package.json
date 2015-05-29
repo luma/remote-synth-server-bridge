@@ -4,7 +4,6 @@
   "description": "A native bridge based on WebRTC for remote sync server",
   "main": "lib/index.js",
   "scripts": {
-    "preinstall": "cd scripts/ && npm install && cd ../ && ./webrtc fetch",
     "build": "node-gyp --debug rebuild",
     "clean": "node-gyp clean",
     "test": "echo \"Error: no test specified\" && exit 1"

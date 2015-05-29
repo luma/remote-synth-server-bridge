@@ -4,7 +4,10 @@ A native bridge based on WebRTC for remote sync server
 
 ### Prerequisites
 
-You'll need XCode 3.0 or higher. You'll also need to install the [Depot Tools](http://dev.chromium.org/developers/how-tos/install-depot-tools).
+You'll need XCode 3.0 or higher. Install the lumbergh-cli tool:
+```
+npm install -g opentok/lumbergh-cli
+```
 
 ### Managing WebRTC
 
@@ -13,24 +16,7 @@ You'll need XCode 3.0 or higher. You'll also need to install the [Depot Tools](h
 #### Get/Update Webrtc
 
 ```
-./webrtc fetch
-```
-
-Or to fetch a specific branch
-```
-./webrtc fetch fooBranch
-```
-
-#### Build Webrtc
-
-Debug mode
-```
-./webrtc build
-```
-
-Release mode
-```
-./webrtc build Release
+lumbergh install
 ```
 
 ### Build the Node module
