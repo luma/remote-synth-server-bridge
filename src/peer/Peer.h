@@ -109,7 +109,6 @@ class Peer
     void* data;
   };
 
-
   uv_mutex_t lock_;
   uv_async_t async_;
   uv_loop_t *loop_;
