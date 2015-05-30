@@ -71,8 +71,7 @@ class Peer
 
   struct SdpEvent {
     SdpEvent(const std::string type, const std::string sdp)
-      : type(type)
-      , sdp(sdp) {}
+      : type(type), sdp(sdp) {}
 
     const std::string type;
     const std::string sdp;
@@ -86,7 +85,6 @@ class Peer
     int mLineIndex;
     const std::string sdp;
   };
-
 
   static v8::Persistent<v8::Function> constructor;
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
