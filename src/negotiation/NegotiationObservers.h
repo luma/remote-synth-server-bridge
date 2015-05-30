@@ -1,11 +1,13 @@
 #ifndef SYNTH_BRIDGE_NEGOTIATION_OBSERVERS_H_
 #define SYNTH_BRIDGE_NEGOTIATION_OBSERVERS_H_
+#pragma once
 
+#include <string>
 #include <functional>
 
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/jsep.h"
-
+#include "common/Logging.h"
 
 typedef std::function<void (webrtc::SessionDescriptionInterface* desc)> CreateSDPCallback;
 typedef std::function<void ()> SetSDPCallback;
@@ -23,12 +25,13 @@ class SetSDPObserver: public webrtc::SetSessionDescriptionObserver {
   ~SetSDPObserver() {}
 
   void OnSuccess() {
+    INFO("SetSDPObserver::OnSuccess");
     if (callback_) callback_();
     CleanUp();
   }
 
   void OnFailure(const std::string& error) {
-    // @todo log something
+    ERROR(error.c_str());
     // @todo eat this for now
     CleanUp();
   }
@@ -54,12 +57,14 @@ class CreateSDPObserver: public webrtc::CreateSessionDescriptionObserver {
   ~CreateSDPObserver() {}
 
   void OnSuccess(webrtc::SessionDescriptionInterface* desc) {
+    INFO("CreateSDPObserver::OnSuccess");
     if (callback_) callback_(desc);
     CleanUp();
   }
 
   void OnFailure(const std::string& error) {
-    // @todo log something
+    ERROR(error.c_str());
+
     // @todo eat this for now
     CleanUp();
   }

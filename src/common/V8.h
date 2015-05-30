@@ -1,5 +1,6 @@
 #ifndef SYNTH_BRIDGE_COMMON_V8_H_
 #define SYNTH_BRIDGE_COMMON_V8_H_
+#pragma once
 
 #include <node.h>
 

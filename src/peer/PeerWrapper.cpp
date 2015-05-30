@@ -1,4 +1,4 @@
-#include "PeerWrapper.h"
+#include "peer/PeerWrapper.h"
 
 using namespace v8;
 

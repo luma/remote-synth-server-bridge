@@ -1,4 +1,5 @@
-#include "Negotiator.h"
+#include "negotiation/Negotiator.h"
+#include "common/Logging.h"
 
 void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp)
 {
@@ -11,11 +12,14 @@ void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineInd
 }
 
 void Negotiator::CreateOffer() {
+  INFO("Negotiator::CreateOffer");
   createSDPObserver_->SetCallback([this] (auto description) {
+    INFO("Negotiator::createSDPObserver_->SetCallback");
     SetLocalDescription(description, [
       eventHandler = std::move(this->eventHandler_),
       description = std::move(description)
     ] {
+      INFO("Negotiator::SetLocalDescription");
       if (eventHandler) {
         eventHandler->OnLocalOffer(description);
       }
@@ -28,7 +32,6 @@ void Negotiator::CreateOffer() {
 void Negotiator::AddRemoteAnswer(const std::string &sdp) {
   std::string type = "answer";
   webrtc::SessionDescriptionInterface* desc = ParseSDP(type, sdp);
-
   pc_->SetLocalDescription(setRemoteSDPObserver_.get(), desc);
 }
 

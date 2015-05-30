@@ -1,7 +1,7 @@
 #include <string>
 #include "webrtc/base/common.h"
-#include "Peer.h"
-#include "Common.h"
+#include "peer/Peer.h"
+#include "common/Logging.h"
 
 using namespace v8;
 
@@ -114,11 +114,14 @@ bool Peer::CreatePeerConnection() {
   constraints.AddMandatory(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
                            webrtc::MediaConstraintsInterface::kValueTrue);
 
-  // @fixme things get explodey without these constraints. I'm not sure why yet
-  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveAudio,
-                           webrtc::MediaConstraintsInterface::kValueFalse);
-  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kOfferToReceiveVideo,
-                           webrtc::MediaConstraintsInterface::kValueFalse);
+  // Things get explodey without these constraints. I'm not sure why yet
+  constraints.AddMandatory(
+            webrtc::MediaConstraintsInterface::kOfferToReceiveAudio,
+            webrtc::MediaConstraintsInterface::kValueFalse);
+
+  constraints.AddMandatory(
+            webrtc::MediaConstraintsInterface::kOfferToReceiveVideo,
+            webrtc::MediaConstraintsInterface::kValueFalse);
 
   pc_ = pcFactory_->CreatePeerConnection(config,
                        &constraints,
@@ -126,7 +129,10 @@ bool Peer::CreatePeerConnection() {
                        nullptr,            // IdentityService
                        this);
 
-  negotiator_->SetPC(pc_);
+  if (pc_.get()) {
+    negotiator_->SetPC(pc_);
+  }
+
   return nullptr != pc_.get();
 }
 
@@ -225,6 +231,7 @@ void Peer::Run(uv_async_t* handle, int status) {
         INFO("EVENT_SIGNALING_STATE_CHANGE");
         {
           Peer::StateEvent* data = static_cast<Peer::StateEvent*>(event.data);
+          INFO(("EVENT_SIGNALING_STATE_CHANGE " + std::to_string(data->state)).c_str());
 
           if (webrtc::PeerConnectionInterface::kClosed == data->state) {
             doShutdown = true;
@@ -333,6 +340,7 @@ void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
 void Peer::OnLocalOffer(webrtc::SessionDescriptionInterface* desc) {
   std::string sdp;
   desc->ToString(&sdp);
+  INFO((std::string("OnLocalOffer") + sdp).c_str());
   SdpEvent* data = new SdpEvent(desc->type(), sdp);
   QueueEvent(Peer::EVENT_HAS_SESSION_DESC, static_cast<void*>(data));
 }

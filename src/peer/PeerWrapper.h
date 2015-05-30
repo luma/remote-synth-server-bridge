@@ -1,12 +1,13 @@
 #ifndef SYNTH_BRIDGE_PEER_WRAPPER_H_
 #define SYNTH_BRIDGE_PEER_WRAPPER_H_
+#pragma once
 
 #include <node.h>
 #include <node_object_wrap.h>
 
-#include "Peer.h"
-#include "CommonV8.h"
-#include "NegotiationInterfaceWrapper.h"
+#include "peer/Peer.h"
+#include "common/V8.h"
+#include "negotiation/NegotiationInterfaceWrapper.h"
 
 class PeerWrapper : public node::ObjectWrap {
  public:

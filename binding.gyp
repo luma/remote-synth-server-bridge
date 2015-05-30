@@ -6,9 +6,9 @@
     {
       'target_name': 'SynthBridge',
       'include_dirs': [
-        'src/include',
+        'src',
         '<(libwebrtc)',
-        '<(libwebrtc)/webrtc',
+#        '<(libwebrtc)/webrtc',
         '<(libwebrtc)/third_party/webrtc',
         '<(libwebrtc)/third_party/webrtc/system_wrappers/interface',
         '<(libwebrtc)/third_party',

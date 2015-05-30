@@ -2,21 +2,22 @@
 #define SYNTH_BRIDGE_PEER_H_
 #pragma once
 
+#include <node.h>
+#include <v8.h>
+#include <node_object_wrap.h>
+#include <uv.h>
+#include <string>
+#include <queue>
 #include <memory>
-
 #include "webrtc/base/scoped_ptr.h"
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/peerconnectionfactory.h"
 #include "talk/app/webrtc/test/fakeconstraints.h"
 
-#include <node.h>
-#include <v8.h>
-#include <node_object_wrap.h>
-#include <uv.h>
+#include "common/V8.h"
+#include "negotiation/NegotiationHandlerInterface.h"
+#include "negotiation/Negotiator.h"
 
-#include "CommonV8.h"
-#include "NegotiationHandlerInterface.h"
-#include "Negotiator.h"
 
 // setup PC
 // negotiation
@@ -31,7 +32,7 @@ class Peer
     public NegotiationHandlerInterface,
     public node::ObjectWrap {
 
-public:
+ public:
   static void Init(v8::Handle<v8::Object> exports);
   static void NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args);
 
@@ -63,7 +64,7 @@ public:
   };
 
   struct StateEvent {
-    StateEvent(uint32_t state) : state(state) {}
+    explicit StateEvent(uint32_t state) : state(state) {}
 
     uint32_t state;
   };
@@ -78,11 +79,11 @@ public:
   };
 
   struct CandidateEvent {
-    CandidateEvent(const std::string mid, unsigned short mLineIndex, const std::string &sdp)
+    CandidateEvent(const std::string mid, int mLineIndex, const std::string &sdp)
       : mid(mid), mLineIndex(mLineIndex), sdp(sdp) {}
 
     const std::string mid;
-    unsigned short mLineIndex;
+    int mLineIndex;
     const std::string sdp;
   };
 
@@ -92,7 +93,7 @@ public:
   static void Close(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void BindToSignals(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-private:
+ private:
   explicit Peer();
   virtual ~Peer();
 
@@ -102,7 +103,7 @@ private:
   void EmitEvent(const std::string &type, const std::string &sdp);
   bool CreatePeerConnection();
 
-private:
+ private:
   struct AsyncEvent {
     AsyncEventType type;
     void* data;

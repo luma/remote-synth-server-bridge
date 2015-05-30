@@ -1,10 +1,11 @@
 #ifndef SYNTH_BRIDGE_NEGOTIATOR_H_
 #define SYNTH_BRIDGE_NEGOTIATOR_H_
+#pragma once
 
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/jsep.h"
-#include "NegotiationHandlerInterface.h"
-#include "NegotiationObservers.h"
+#include "negotiation/NegotiationHandlerInterface.h"
+#include "negotiation/NegotiationObservers.h"
 
 class Negotiator {
  public:
@@ -27,8 +28,7 @@ class Negotiator {
     pc_ = NULL;
   }
 
-protected:
-
+ protected:
   void SetLocalDescription(webrtc::SessionDescriptionInterface* desc, SetSDPCallback callback);
   webrtc::SessionDescriptionInterface* ParseSDP(const std::string &type, const std::string &sdpText);
 

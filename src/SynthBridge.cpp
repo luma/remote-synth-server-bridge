@@ -1,11 +1,10 @@
 #include <node.h>
-
-#include "base/logging.h"
-#include "base/ssladapter.h"
+#include <string>
+#include "webrtc/base/ssladapter.h"
 // #include "webrtc/system_wrappers/interface/field_trial_default.h"
 #include "webrtc/system_wrappers/interface/field_trial.h"
-
-#include "Peer.h"
+#include "common/Logging.h"
+#include "peer/Peer.h"
 
 // static const char kFieldTrials[] = "";
 
@@ -23,6 +22,9 @@ namespace field_trial {
 
 
 void SetupWebRtc() {
+  INFO((std::string("Logger level:") +
+            std::to_string(rtc::LogMessage::GetMinLogSeverity())).c_str());
+
   // webrtc::field_trial::InitFieldTrialsFromString(nullptr);
 
   if (!rtc::InitializeSSL()) {

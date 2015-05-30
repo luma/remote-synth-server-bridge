@@ -11,7 +11,8 @@
     "configurations": {
       "Debug": {
         "defines": [
-          "DEBUG"
+          "DEBUG",
+          "_DEBUG",
         ],
         "xcode_settings": {
           "GCC_OPTIMIZATION_LEVEL": "0",
