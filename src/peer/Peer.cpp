@@ -19,7 +19,7 @@ Peer::Peer()
   }
 
   uv_mutex_init(&lock_);
-  uv_async_init(loop_, &async_, reinterpret_cast<uv_async_cb>(Run));
+  uv_async_init(loop_, &async_, reinterpret_cast<uv_async_cb>(ProcessEvents));
   async_.data = this;
 
   QueueEvent(EVENT_INIT, static_cast<void*>(NULL));
@@ -185,7 +185,7 @@ void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Peer* self = ObjectWrap::Unwrap<Peer>(args.Holder());
 
   Handle<Object> candidate = Handle<Object>::Cast(args[0]);
-  uint32_t sdp_mline_index = candidate->Get(String::NewFromUtf8(isolate, "sdpMLineIndex"))->Uint32Value();
+  int sdp_mline_index = candidate->Get(String::NewFromUtf8(isolate, "sdpMLineIndex"))->Uint32Value();
   v8::String::Utf8Value _candidate(candidate->Get(String::NewFromUtf8(isolate, "candidate"))->ToString());
   v8::String::Utf8Value _sipMid(candidate->Get(String::NewFromUtf8(isolate, "sdpMid"))->ToString());
 
@@ -196,7 +196,7 @@ void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 
-void Peer::Run(uv_async_t* handle, int status) {
+void Peer::ProcessEvents(uv_async_t* handle, int status) {
   INFO("PEER::RUN");
   Isolate* isolate = Isolate::GetCurrent();
   HandleScope scope(isolate);
@@ -228,10 +228,11 @@ void Peer::Run(uv_async_t* handle, int status) {
         break;
 
       case EVENT_SIGNALING_STATE_CHANGE:
-        INFO("EVENT_SIGNALING_STATE_CHANGE");
         {
-          Peer::StateEvent* data = static_cast<Peer::StateEvent*>(event.data);
-          INFO(("EVENT_SIGNALING_STATE_CHANGE " + std::to_string(data->state)).c_str());
+          auto data = static_cast<Peer::StateEvent*>(event.data);
+
+          INFO(("EVENT_SIGNALING_STATE_CHANGE " +
+                      std::to_string(data->state)).c_str());
 
           if (webrtc::PeerConnectionInterface::kClosed == data->state) {
             doShutdown = true;
@@ -242,7 +243,7 @@ void Peer::Run(uv_async_t* handle, int status) {
       case EVENT_HAS_REMOTE_CANDIDATE:
         INFO("EVENT_HAS_REMOTE_CANDIDATE");
         {
-          Peer::CandidateEvent* data = static_cast<Peer::CandidateEvent*>(event.data);
+          auto data = static_cast<Peer::CandidateEvent*>(event.data);
           self->negotiator_->AddIceCandidate(data->mid, data->mLineIndex, data->sdp);
         }
         break;
@@ -250,7 +251,7 @@ void Peer::Run(uv_async_t* handle, int status) {
       case EVENT_HAS_LOCAL_CANDIDATE:
         INFO("EVENT_HAS_LOCAL_CANDIDATE");
         {
-          // Peer::CandidateEvent* data = static_cast<Peer::CandidateEvent*>(event.data);
+          // auto data = static_cast<Peer::CandidateEvent*>(event.data);
 
           // @TODO
 
@@ -270,7 +271,7 @@ void Peer::Run(uv_async_t* handle, int status) {
       case EVENT_HAS_SESSION_DESC:
         INFO("EVENT_HAS_SESSION_DESC");
         {
-          Peer::SdpEvent* data = static_cast<Peer::SdpEvent*>(event.data);
+          auto data = static_cast<Peer::SdpEvent*>(event.data);
 
           if (data->type == "offer") {
             self->EmitEvent("offer", data->sdp);
@@ -300,7 +301,7 @@ void Peer::Run(uv_async_t* handle, int status) {
 //
 
 void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState newState) {
-  StateEvent* data = new StateEvent(static_cast<uint32_t>(newState));
+  auto data = new StateEvent(static_cast<uint32_t>(newState));
   QueueEvent(Peer::EVENT_SIGNALING_STATE_CHANGE, static_cast<void*>(data));
 }
 
@@ -326,9 +327,9 @@ void Peer::OnIceChange() {
 }
 
 void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
-  CandidateEvent* data = new CandidateEvent(candidate->sdp_mid(),
-                                            candidate->sdp_mline_index(),
-                                            candidate->candidate().ToString());
+  auto data = new CandidateEvent(candidate->sdp_mid(),
+                                  candidate->sdp_mline_index(),
+                                  candidate->candidate().ToString());
 
   QueueEvent(Peer::EVENT_HAS_LOCAL_CANDIDATE, static_cast<void*>(data));
 }
@@ -341,7 +342,7 @@ void Peer::OnLocalOffer(webrtc::SessionDescriptionInterface* desc) {
   std::string sdp;
   desc->ToString(&sdp);
   INFO((std::string("OnLocalOffer") + sdp).c_str());
-  SdpEvent* data = new SdpEvent(desc->type(), sdp);
+  auto data = new SdpEvent(desc->type(), sdp);
   QueueEvent(Peer::EVENT_HAS_SESSION_DESC, static_cast<void*>(data));
 }
 

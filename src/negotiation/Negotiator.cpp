@@ -1,9 +1,8 @@
 #include "negotiation/Negotiator.h"
 #include "common/Logging.h"
 
-void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp)
-{
-  webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(mid, mLineIndex, sdp);
+void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp) {
+  auto candidate = webrtc::CreateIceCandidate(mid, mLineIndex, sdp);
 
   if (!pc_->AddIceCandidate(candidate)) {
     // @todo something something error
@@ -31,7 +30,7 @@ void Negotiator::CreateOffer() {
 
 void Negotiator::AddRemoteAnswer(const std::string &sdp) {
   std::string type = "answer";
-  webrtc::SessionDescriptionInterface* desc = ParseSDP(type, sdp);
+  auto desc = ParseSDP(type, sdp);
   pc_->SetLocalDescription(setRemoteSDPObserver_.get(), desc);
 }
 
@@ -42,8 +41,7 @@ void Negotiator::SetLocalDescription(webrtc::SessionDescriptionInterface* desc, 
 
 webrtc::SessionDescriptionInterface* Negotiator::ParseSDP(const std::string &type, const std::string &sdpText) {
   webrtc::SdpParseError parseErr;
-  webrtc::SessionDescriptionInterface* sdp
-            = webrtc::CreateSessionDescription(type, sdpText, &parseErr);
+  auto sdp = webrtc::CreateSessionDescription(type, sdpText, &parseErr);
 
   if (nullptr == sdp) {
     // @todo do something with parseErr.line and parseErr.description

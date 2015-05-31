@@ -95,7 +95,7 @@ class Peer
   explicit Peer();
   virtual ~Peer();
 
-  static void Run(uv_async_t* handle, int status);
+  static void ProcessEvents(uv_async_t* handle, int status);
 
   void QueueEvent(AsyncEventType type, void* data);
   void EmitEvent(const std::string &type, const std::string &sdp);
