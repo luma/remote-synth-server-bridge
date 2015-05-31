@@ -77,9 +77,8 @@
         'libraries': []
       },
       'sources': [
-        'src/Negotiator.cpp',
-        'src/Peer.cpp',
-#        'src/PeerWrapper.cpp',
+        'src/negotiation/Negotiator.cpp',
+        'src/peer/Peer.cpp',
         'src/SynthBridge.cpp'
       ],
     }
