@@ -3,6 +3,8 @@
     'project_root%': '<!(node -p -e "require(\'fs\').realpathSync(\'./\')")',
     'libwebrtc%': '<(project_root%)/ext/webrtc/osx/x64/include',
     'libwebrtc_out%': '<(project_root%)/ext/webrtc/osx/x64/lib',
+    #'libwebrtc%': '<(project_root%)/ext/webrtc_src',
+    #'libwebrtc_out%': '<(project_root%)/ext/webrtc_src/out/artifact/lib',
   },
   "target_defaults": {
     "default_configuration": "Debug",

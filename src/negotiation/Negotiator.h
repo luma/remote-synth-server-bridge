@@ -2,6 +2,7 @@
 #define SYNTH_BRIDGE_NEGOTIATOR_H_
 #pragma once
 
+#include <string>
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/jsep.h"
 #include "negotiation/NegotiationHandlerInterface.h"
@@ -19,7 +20,7 @@ class Negotiator {
     pc_ = pc;
   }
 
-  void AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp);
+  void AddIceCandidate (const std::string mid, int mLineIndex, const std::string &sdp);
   void CreateOffer();
   void AddRemoteAnswer(const std::string &sdp);
 

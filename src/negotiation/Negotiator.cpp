@@ -1,7 +1,7 @@
 #include "negotiation/Negotiator.h"
 #include "common/Logging.h"
 
-void Negotiator::AddIceCandidate (const std::string mid, unsigned short mLineIndex, const std::string &sdp) {
+void Negotiator::AddIceCandidate (const std::string mid, int mLineIndex, const std::string &sdp) {
   auto candidate = webrtc::CreateIceCandidate(mid, mLineIndex, sdp);
 
   if (!pc_->AddIceCandidate(candidate)) {
