@@ -13,8 +13,8 @@ class Negotiator {
   explicit Negotiator(NegotiationHandlerInterface* eventHandler)
     : eventHandler_(eventHandler),
       createSDPObserver_(new rtc::RefCountedObject<CreateSDPObserver>()),
-      setLocalSDPObserver_(new rtc::RefCountedObject<SetSDPObserver>),
-      setRemoteSDPObserver_(new rtc::RefCountedObject<SetSDPObserver>) {}
+      setLocalSDPObserver_(new rtc::RefCountedObject<SetSDPObserver>()),
+      setRemoteSDPObserver_(new rtc::RefCountedObject<SetSDPObserver>()) {}
 
   void SetPC(rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc) {
     pc_ = pc;

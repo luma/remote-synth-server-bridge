@@ -18,4 +18,4 @@ peer.onSignal(function(event) {
 setTimeout(function() {
   peer.close();
   peer = null;
-}, 10000);
+}, 20000);

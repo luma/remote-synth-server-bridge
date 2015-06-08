@@ -10,10 +10,20 @@ static const char kDefaultStunServer[] = "stun:stun.l.google.com:19302";
 
 Peer::Peer()
   : loop_(uv_default_loop()),
-    pcFactory_(webrtc::CreatePeerConnectionFactory()),
-    negotiator_(new Negotiator(this)) {
+    negotiator_(new Negotiator(this)),
+    pcWorkerThread_(new rtc::Thread()),
+    pcSignalingThread_(new rtc::Thread()) {
+
+  assert(NULL != pcSignalingThread_ && NULL != pcWorkerThread_);
+
+  pcWorkerThread_->Start();
+  pcSignalingThread_->Start();
+
+  pcFactory_ = webrtc::CreatePeerConnectionFactory(
+                    pcWorkerThread_, pcSignalingThread_, nullptr, nullptr, nullptr);
 
   if (!pcFactory_.get()) {
+    ERROR("Could not create PeerConnectionFactory");
     // @todo some crazy shit
     return;
   }
@@ -111,10 +121,17 @@ bool Peer::CreatePeerConnection() {
   // if you want to interopt with them.
   //
   webrtc::FakeConstraints constraints;
-  constraints.AddMandatory(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
-                           webrtc::MediaConstraintsInterface::kValueTrue);
 
-  // Things get explodey without these constraints. I'm not sure why yet
+  constraints.AddMandatory(
+             webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
+             webrtc::MediaConstraintsInterface::kValueTrue);
+
+  constraints.AddMandatory(
+            webrtc::MediaConstraintsInterface::kEnableRtpDataChannels,
+            webrtc::MediaConstraintsInterface::kValueTrue);
+
+
+  // // Things get explodey without these constraints. I'm not sure why yet
   constraints.AddMandatory(
             webrtc::MediaConstraintsInterface::kOfferToReceiveAudio,
             webrtc::MediaConstraintsInterface::kValueFalse);

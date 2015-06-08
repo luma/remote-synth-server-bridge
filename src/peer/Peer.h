@@ -117,6 +117,9 @@ class Peer
   rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pcFactory_;
   rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc_;
   std::unique_ptr<Negotiator> negotiator_;
+
+  rtc::Thread *pcWorkerThread_;
+  rtc::Thread *pcSignalingThread_;
 };
 
 #endif  // SYNTH_BRIDGE_PEER_H_

@@ -1,5 +1,6 @@
-#include "negotiation/Negotiator.h"
+#include "talk/app/webrtc/test/fakeconstraints.h"
 #include "common/Logging.h"
+#include "negotiation/Negotiator.h"
 
 void Negotiator::AddIceCandidate (const std::string mid, int mLineIndex, const std::string &sdp) {
   auto candidate = webrtc::CreateIceCandidate(mid, mLineIndex, sdp);
@@ -13,19 +14,17 @@ void Negotiator::AddIceCandidate (const std::string mid, int mLineIndex, const s
 void Negotiator::CreateOffer() {
   INFO("Negotiator::CreateOffer");
   createSDPObserver_->SetCallback([this] (auto description) {
-    INFO("Negotiator::createSDPObserver_->SetCallback");
     SetLocalDescription(description, [
       eventHandler = std::move(this->eventHandler_),
       description = std::move(description)
     ] {
-      INFO("Negotiator::SetLocalDescription");
       if (eventHandler) {
         eventHandler->OnLocalOffer(description);
       }
     });
   });
 
-  pc_->CreateOffer(createSDPObserver_, nullptr /* mediaConstraints */);
+  pc_->CreateOffer(createSDPObserver_, nullptr);
 }
 
 void Negotiator::AddRemoteAnswer(const std::string &sdp) {
