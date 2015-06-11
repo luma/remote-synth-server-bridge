@@ -119,7 +119,10 @@ void MediaDevices::EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& a
   auto callback = PersistentFunction::Persistent(isolate,
                                     v8::Handle<v8::Function>::Cast(args[1]));
 
-  self->eventLoop_.CallAsync([self, &hasVideo, &hasAudio, &callback](void* data) {
+  self->eventLoop_.CallAsync([
+    self, hasVideo, hasAudio,
+    callback = std::move(callback)
+  ](void* data) {
     self->OnEnumerateDevices(hasVideo, hasAudio, callback);
   });
 
