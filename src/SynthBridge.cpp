@@ -4,6 +4,9 @@
 // #include "webrtc/system_wrappers/interface/field_trial_default.h"
 #include "webrtc/system_wrappers/interface/field_trial.h"
 #include "common/Logging.h"
+#include "negotiation/IceCandidate.h"
+#include "devices/MediaDevices.h"
+#include "devices/MediaDeviceInfo.h"
 #include "peer/Peer.h"
 
 // static const char kFieldTrials[] = "";
@@ -22,43 +25,43 @@ namespace field_trial {
 
 
 void SetupWebRtc() {
-  INFO((std::string("Logger level:") +
-            std::to_string(rtc::LogMessage::GetMinLogSeverity())).c_str());
+  INFO("Logger level: %s",
+          (std::to_string(rtc::LogMessage::GetMinLogSeverity())).c_str());
 
   // webrtc::field_trial::InitFieldTrialsFromString(nullptr);
 
   if (!rtc::InitializeSSL()) {
-    // @todo log error "Failed to initialise SSL";
+    ERROR("Failed to initialise SSL");
     // @todo something?
     return;
-  }
-  else {
-    // @todo log info "Initialised SSL";
+  } else {
+    INFO("Initialised SSL");
   }
 
   if (!rtc::InitializeSSLThread()) {
-    // @todo log error "Failed to initialise SSL Thread";
+    ERROR("Failed to initialise SSL Thread");
     // @todo something?
     return;
-  }
-  else {
-    // @todo log info "Initialised SSL Thread";
+  } else {
+    INFO("Initialised SSL Thread");
   }
 }
 
 // @todo call this
 void TearDownWebRtc() {
   if (!rtc::CleanupSSL()) {
-    // @todo log error "Failed to successfully clean up SSL";
-  }
-  else {
-    // @todo log info "Cleaned up SSL";
+    ERROR("Failed to successfully clean up SSL");
+  } else {
+    INFO("Cleaned up SSL");
   }
 }
 
 void InitAll(v8::Handle<v8::Object> exports) {
   SetupWebRtc();
 
+  MediaDevices::Init(exports);
+  MediaDeviceInfo::Init(exports);
+  IceCandidate::Init(exports);
   Peer::Init(exports);
 }
 

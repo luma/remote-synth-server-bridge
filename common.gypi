@@ -1,6 +1,7 @@
 {
   'variables': {
     'project_root%': '<!(node -p -e "require(\'fs\').realpathSync(\'./\')")',
+    'extdir%': '<(project_root%)/ext',
     #'libwebrtc%': '<(project_root%)/ext/webrtc/osx/x64/include',
     #'libwebrtc_out%': '<(project_root%)/ext/webrtc/osx/x64/lib',
     'libwebrtc%': '<(project_root%)/ext/webrtc_src',
@@ -8,8 +9,6 @@
   },
   "target_defaults": {
     "default_configuration": "Debug",
-    "xcode_settings": {
-    },
     "configurations": {
       "Debug": {
         "defines": [

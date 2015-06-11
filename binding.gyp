@@ -4,9 +4,34 @@
   ],
   'targets': [
     {
+      'target_name': 'crossguid',
+      'type': 'none',
+      'actions': [
+        {
+          'action_name': 'run_build',
+          'inputs': [],
+          'outputs': ['/dev/null'],
+
+          'conditions': [
+            ['OS=="linux"', {
+              'action': ['cd', '<(extdir)/crossguid/', '&&', './linux.sh'],
+            }],
+            ['OS=="mac"', {
+              'action': ['cd', '<(extdir)/crossguid/', '&&', './mac.sh'],
+            }],
+          ],
+          'message': 'Run build script'
+        }
+      ],
+    },
+    {
       'target_name': 'SynthBridge',
+      'dependencies': [
+        'crossguid'
+      ],
       'include_dirs': [
         'src',
+        '<(extdir)',
         '<(libwebrtc)',
         '<(libwebrtc)/third_party/webrtc',
         '<(libwebrtc)/third_party/webrtc/system_wrappers/interface',
@@ -32,13 +57,7 @@
         '-fpermissive',
         '-std=c++14',
       ],
-      'xcode_settings': {
-        'OTHER_CPLUSPLUSFLAGS' : ['-std=c++14','-stdlib=libc++'],
-        'OTHER_LDFLAGS': ['-stdlib=libc++'],
-        'MACOSX_DEPLOYMENT_TARGET': '10.7',
-      },
       'defines': [
-#        'TRACING',
         'LARGEFILE_SOURCE',
         '_FILE_OFFSET_BITS=64',
         'WEBRTC_TARGET_PC',
@@ -53,9 +72,15 @@
         'DYNAMIC_ANNOTATIONS_ENABLED=0',
         'WEBRTC_POSIX=1'
       ],
+      'xcode_settings': {
+        'OTHER_CPLUSPLUSFLAGS' : ['-std=c++14','-stdlib=libc++'],
+        'OTHER_LDFLAGS': ['-stdlib=libc++'],
+        'MACOSX_DEPLOYMENT_TARGET': '10.7',
+      },
       'link_settings': {
         'library_dirs': [
-          '<(libwebrtc_out)/'
+          '<(libwebrtc_out)/',
+          '<(extdir)/crossguid/',
         ],
         'ldflags': [],
         'conditions': [
@@ -67,6 +92,7 @@
           }],
           ['OS=="mac"', {
             'libraries': [
+              '<(extdir)/crossguid/guid.o',
               '-lexpat',
               '-lprotobuf_lite',
               '-lyuv',
@@ -111,7 +137,6 @@
               '-lvideo_engine_core',
               '-lvideo_capture_module',
               '-lvideo_capture_module_internal_impl',
-#              '-lvideo_render',
               '-lvideo_render_module',
               '-lvideo_render_module_internal_impl',
               '-ljingle_media',
@@ -142,9 +167,14 @@
         'libraries': []
       },
       'sources': [
+        'src/common/V8.cpp',
+        'src/common/EventLoop.cpp',
+        'src/devices/MediaDevices.cpp',
+        'src/devices/MediaDeviceInfo.cpp',
+        'src/negotiation/IceCandidate.cpp',
         'src/negotiation/Negotiator.cpp',
         'src/peer/Peer.cpp',
-        'src/SynthBridge.cpp'
+        'src/SynthBridge.cpp',
       ],
     }
   ]

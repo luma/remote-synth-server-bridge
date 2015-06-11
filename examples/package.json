@@ -1,0 +1,48 @@
+{
+  "name": "remote-synth-server-bridge-examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jraoult/remote-synth-server-bridge.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jraoult/remote-synth-server-bridge/issues"
+  },
+  "homepage": "https://github.com/jraoult/remote-synth-server-bridge",
+  "dependencies": {
+    "pubnub": "~3.7.11",
+    "segfault-handler": "~0.2.4",
+    "prettyjson": "~1.1.2"
+  },
+  "jshintConfig": {
+    "globals": {
+      "require": true,
+      "console": true,
+      "process": true
+    },
+    "globalstrict": true,
+    "browser": true,
+    "esnext": true,
+    "strict": false,
+    "camelcase": true,
+    "eqeqeq": true,
+    "eqnull": true,
+    "expr": true,
+    "indent": 2,
+    "latedef": true,
+    "maxlen": 100,
+    "newcap": true,
+    "quotmark": "single",
+    "smarttabs": true,
+    "trailing": true,
+    "undef": true,
+    "unused": true
+  }
+}

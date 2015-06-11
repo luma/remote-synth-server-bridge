@@ -1,0 +1,3 @@
+[submodule "ext/crossguid"]
+	path = ext/crossguid
+	url = https://github.com/graeme-hill/crossguid.git
