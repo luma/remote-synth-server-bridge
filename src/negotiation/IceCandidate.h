@@ -33,6 +33,8 @@ class IceCandidate : public node::ObjectWrap {
   std::string GetSdpMid() { return sdpMid_; }
   std::string GetCandidate() { return candidate_; }
 
+  static v8::Local<v8::Object> ToWrapped(std::string sdpMid, int sdpMLineIndex, std::string candidate);
+
  private:
   static void GetSdpMid(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);
   static void GetSdpMLineIndex(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);

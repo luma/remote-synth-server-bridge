@@ -16,18 +16,20 @@ namespace std {
   }
 }
 
-EventLoop::EventLoop() : loop_(uv_default_loop()) {
+EventLoop::EventLoop(const char* name)
+    : loop_(uv_default_loop()), name_(name) {
   uv_mutex_init(&lock_);
   uv_async_init(loop_, &async_, reinterpret_cast<uv_async_cb>(ProcessEvents));
   async_.data = this;
 }
 
 EventLoop::~EventLoop() {
+  delete name_;
   Terminate();
 }
 
 void EventLoop::Terminate() {
-  INFO("EventLoop:: Shutting down");
+  INFO("%s::EventLoop:: Shutting down", name_);
   uv_close((uv_handle_t*)(&async_), NULL);
 }
 
@@ -85,9 +87,8 @@ void EventLoop::CallAsync(Callback callback, void* data) {
 }
 
 void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
-  INFO("EventLoop::ProcessEvents");
-
   EventLoop* self = static_cast<EventLoop*>(handle->data);
+  INFO("%s::EventLoop::ProcessEvents", self->name_);
 
   while (true) {
     AsyncEvent event;
@@ -103,13 +104,13 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
       self->events_.pop();
     }
 
-    INFO("EventLoop:: Processing %s...", event.type.c_str());
+    INFO("%s::EventLoop:: Processing %s...", self->name_, event.type.c_str());
 
     auto it = self->callbackMap_.find(event.type);
     auto callbacks = it->second;
 
     if (it ==  self->callbackMap_.end()) {
-      ERROR("EventLoop:: Unexpected event type: %s", event.type.c_str());
+      ERROR("%s::EventLoop:: Unexpected event type: %s", self->name_, event.type.c_str());
       return;
     } else {
       for (auto const &callback : callbacks) {
@@ -118,7 +119,7 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
     }
   }
 
-  INFO("EventLoop::ProcessEvents");
+  INFO("%s::EventLoop::ProcessEvents", self->name_);
 }
 
 std::string EventLoop::NewGuidStr() {

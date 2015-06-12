@@ -75,6 +75,22 @@ void IceCandidate::NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args) 
   args.GetReturnValue().Set(instance);
 }
 
+v8::Local<v8::Object> IceCandidate::ToWrapped(std::string sdpMid, int sdpMLineIndex, std::string candidate) {
+  auto isolate = v8::Isolate::GetCurrent();
+  v8::EscapableHandleScope scope(isolate);
+
+  const int argc = 4;
+  v8::Local<v8::Value> argv[argc] = {
+    V8Helpers::CoerceToV8Str(sdpMid),
+    v8::Number::New(isolate, sdpMLineIndex),
+    V8Helpers::CoerceToV8Str(candidate)
+  };
+
+  auto cons = v8::Local<v8::Function>::New(isolate, IceCandidate::constructor);
+  auto instance = cons->NewInstance(argc, argv);
+  return scope.Escape(instance);
+}
+
 void IceCandidate::GetSdpMid(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
   auto value = ObjectWrap::Unwrap<IceCandidate>(info.Holder())->sdpMid_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));

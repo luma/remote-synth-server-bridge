@@ -48,7 +48,7 @@ class MediaDevices : public node::ObjectWrap {
   void OnEnumerateDevices(bool hasVideo, bool hasAudio, PersistentFunction callback);
 
 
-  EventLoop eventLoop_;
+  EventLoop eventLoop_ {"MediaDevices"};
   PersistentFunction onDeviceChange_;
   rtc::scoped_ptr<cricket::DeviceManagerInterface> deviceManager_;
 };

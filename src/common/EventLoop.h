@@ -53,7 +53,7 @@ class AsyncEvent {
 
 class EventLoop {
  public:
-  EventLoop();
+  EventLoop(const char* name);
   ~EventLoop();
 
   void Terminate();
@@ -90,6 +90,7 @@ class EventLoop {
   uv_async_t async_;
   uv_loop_t *loop_;
 
+  const char *name_;
   std::queue<AsyncEvent> events_;
   std::map<std::string, Callbacks> callbackMap_;
 

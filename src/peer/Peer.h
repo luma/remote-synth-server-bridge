@@ -109,7 +109,7 @@ class Peer
   // static void ProcessEvents(uv_async_t* handle, int status);
 
   void QueueEvent(AsyncEventType type, void* data);
-  void EmitEvent(const std::string &type, const std::string &sdp);
+  void EmitSdpEvent(const std::string &type, const std::string &sdp);
   void OnSessionDesc(std::string type, std::string sdp);
   bool CreatePeerConnection();
 
@@ -119,7 +119,7 @@ class Peer
     void* data;
   };
 
-  EventLoop eventLoop_;
+  EventLoop eventLoop_ {"Peer"};
   PersistentFunction eventHandler_;
 
   rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pcFactory_;

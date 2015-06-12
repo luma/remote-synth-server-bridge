@@ -14,6 +14,8 @@ MediaDevices::MediaDevices() {
 }
 
 MediaDevices::~MediaDevices() {
+  eventLoop_.Terminate();
+
   if (deviceManager_) {
     deviceManager_->Terminate();
   }

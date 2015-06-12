@@ -197,7 +197,7 @@ void Peer::AddRemoteAnswer(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::String::Utf8Value _sdp(answer->Get(v8::String::NewFromUtf8(isolate, "sdp"))->ToString());
   std::string sdp = *_sdp;
 
-  self->eventLoop_.CallAsync([&self, &sdp](void* data) {
+  self->eventLoop_.CallAsync([&self, sdp](void* data) {
     self->OnSessionDesc("answer", sdp);
   });
 
@@ -211,14 +211,7 @@ void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
   auto self = ObjectWrap::Unwrap<Peer>(args.Holder());
   auto candidate = ObjectWrap::Unwrap<IceCandidate>(args[0]->ToObject());
 
-  // Handle<Object> candidateWrapper = Handle<Object>::Cast(args[0]);
-  // int sdpMLineIndex = candidateWrapper->Get(String::NewFromUtf8(isolate, "sdpMLineIndex"))->Uint32Value();
-  // v8::String::Utf8Value _candidate(candidateWrapper->Get(String::NewFromUtf8(isolate, "candidate"))->ToString());
-  // v8::String::Utf8Value _sdpMid(candidateWrapper->Get(String::NewFromUtf8(isolate, "sdpMid"))->ToString());
-  // std::string sdpMid = *_sdpMid;
-  // std::string candidate = *_candidate;
-
-  self->eventLoop_.CallAsync([&self, &candidate](void* data) {
+  self->eventLoop_.CallAsync([&self, candidate](void* data) {
     INFO("EVENT_HAS_REMOTE_CANDIDATE");
     self->negotiator_->AddIceCandidate(
                         candidate->GetSdpMid(),
@@ -229,156 +222,6 @@ void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
   args.GetReturnValue().Set(args.This());
 }
 
-
-// void Peer::ProcessEvents(uv_async_t* handle, int status) {
-//   INFO("PEER::RUN");
-//   auto isolate = v8::Isolate::GetCurrent();
-//   v8::HandleScope scope(isolate);
-
-//   Peer* self = static_cast<Peer*>(handle->data);
-//   bool doShutdown = false;
-
-//   while (true) {
-//     uv_mutex_lock(&self->lock_);
-
-//     if (self->events_.empty()) {
-//       uv_mutex_unlock(&self->lock_);
-//       break;
-//     }
-
-//     AsyncEvent event = self->events_.front();
-//     self->events_.pop();
-//     uv_mutex_unlock(&self->lock_);
-
-//     switch (event.type) {
-//       case EVENT_INIT:
-//         INFO("EVENT_INIT");
-//         if (!self->CreatePeerConnection()) {
-//           // @todo something?
-//           return;
-//         }
-
-//         self->negotiator_->CreateOffer();
-//         break;
-
-//       case EVENT_SIGNALING_STATE_CHANGE:
-//         {
-//           auto data = static_cast<Peer::StateEvent*>(event.data);
-
-//           INFO(("EVENT_SIGNALING_STATE_CHANGE " +
-//                       std::to_string(data->state)).c_str());
-
-//           if (webrtc::PeerConnectionInterface::kClosed == data->state) {
-//             doShutdown = true;
-//           }
-//         }
-//         break;
-
-//       case EVENT_HAS_REMOTE_CANDIDATE:
-//         INFO("EVENT_HAS_REMOTE_CANDIDATE");
-//         {
-//           auto data = static_cast<Peer::CandidateEvent*>(event.data);
-//           self->negotiator_->AddIceCandidate(data->mid, data->mLineIndex, data->sdp);
-//         }
-//         break;
-
-//       case EVENT_HAS_LOCAL_CANDIDATE:
-//         INFO("EVENT_HAS_LOCAL_CANDIDATE");
-//         {
-//           // auto data = static_cast<Peer::CandidateEvent*>(event.data);
-
-//           // @TODO
-
-//           // auto isolate = v8::Isolate::GetCurrent();
-
-//           // Local<Object> eventObj = Object::New(isolate);
-//           // eventObj->Set(String::NewFromUtf8(isolate, "type"),
-//           //   String::NewFromUtf8(isolate, "offer", String::kNormalString, "offer".length()));
-
-//           // obj->Set(String::NewFromUtf8(isolate, "sdp"),
-//           //   String::NewFromUtf8(isolate, sdp.c_str(), String::kNormalString, sdp.length()));
-
-//           self->EmitEvent("candidate", "sdp");
-//         }
-//         break;
-
-//       case EVENT_HAS_SESSION_DESC:
-//         INFO("EVENT_HAS_SESSION_DESC");
-//         {
-//           auto data = static_cast<Peer::SdpEvent*>(event.data);
-
-//           if (data->type == "offer") {
-//             self->EmitEvent("offer", data->sdp);
-//           } else if (data->type == "answer") {
-//             self->negotiator_->AddRemoteAnswer(data->sdp);
-//           }
-//         }
-
-//         break;
-
-//       case EVENT_ENUMERATE_DEVICES:
-//         // INFO("EVENT_ENUMERATE_DEVICES");
-//         // {
-//         //   auto data = static_cast<Peer::EnumerateDevicesEvent*>(event.data);
-
-//         //   std::vector<cricket::Device> audioDevices;
-//         //   std::vector<cricket::Device> videoDevices;
-
-//         //   if (data->audio) {
-//         //     INFO("Enumerating Audio devices");
-//         //     self->deviceManager_->GetAudioInputDevices(&audioDevices);
-//         //   }
-
-//         //   if (data->video) {
-//         //     INFO("Enumerating Video devices");
-//         //     self->deviceManager_->GetVideoCaptureDevices(&videoDevices);
-//         //   }
-
-//         //   // build js friendly object
-//         //   //
-//         //   auto isolate = v8::Isolate::GetCurrent();
-//         //   {
-//         //     const unsigned argc = 2;
-//         //     // v8::HandleScope scope(isolate);
-
-//         //     size_t deviceIndex = 0;
-//         //     Local<Array> devices = v8::Array::New(isolate,
-//         //                     audioDevices.size() + videoDevices.size());
-
-//         //     for (auto const & device: audioDevices) {
-//         //       INFO(("Audio Device: " + device.name).c_str());
-//         //       devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("audioinput", device));
-//         //       deviceIndex++;
-//         //     }
-
-//         //     for (auto const & device: videoDevices) {
-//         //       INFO(("Video Device: " + device.name).c_str());
-//         //       devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("videoinput", device));
-//         //       deviceIndex++;
-//         //     }
-
-//         //     Local<Value> argv[argc] = { v8::Undefined(isolate), devices };
-//         //     V8Helpers::CallFn(data->callback, argc, argv);
-
-//         //     // @todo free up data?
-//         //   }
-//         }
-//         break;
-
-//       default:
-//         printf("Unexpected event type: %uz\n", event.type);
-//         break;
-//     }
-//   }
-
-//   if (doShutdown) {
-//     INFO("Shutting down event loop");
-//     uv_close((uv_handle_t*) &self->async_, NULL);
-//   }
-
-//   INFO("EXITING PEER::RUN");
-// }
-
 //
 // PeerConnectionObserver implementation.
 //
@@ -387,7 +230,7 @@ void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new
   // auto data = new StateEvent(static_cast<uint32_t>(newState));
   // QueueEvent(Peer::EVENT_SIGNALING_STATE_CHANGE, static_cast<void*>(data));
 
-  eventLoop_.CallAsync([this, &newState](void* data) {
+  eventLoop_.CallAsync([this, newState](void* data) {
     // auto data = static_cast<Peer::StateEvent*>(event.data);
 
     INFO("EVENT_SIGNALING_STATE_CHANGE %s",
@@ -421,26 +264,24 @@ void Peer::OnIceChange() {
 }
 
 void Peer::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
-  // auto data = new CandidateEvent(candidate->sdp_mid(),
-  //                                 candidate->sdpMLineIndex(),
-  //                                 candidate->candidate().ToString());
-
-  eventLoop_.CallAsync([this, &candidate](void* data) {
+  eventLoop_.CallAsync([this, candidate](void* data) {
     INFO("EVENT_HAS_LOCAL_CANDIDATE");
-    // auto data = static_cast<Peer::CandidateEvent*>(event.data);
 
-    // @TODO
+    auto iceCandidate = IceCandidate::ToWrapped(
+                            candidate->sdp_mid(),
+                            candidate->sdp_mline_index(),
+                            candidate->candidate().ToString());
 
-    // auto isolate = v8::Isolate::GetCurrent();
+    auto isolate = v8::Isolate::GetCurrent();
+    const unsigned argc = 1;
 
-    // Local<Object> eventObj = Object::New(isolate);
-    // eventObj->Set(String::NewFromUtf8(isolate, "type"),
-    //   String::NewFromUtf8(isolate, "offer", String::kNormalString, "offer".length()));
+    auto obj = v8::Object::New(isolate);
+    obj->Set(v8::String::NewFromUtf8(isolate, "type"),
+              v8::String::NewFromUtf8(isolate, "candidate"));
+    obj->Set(v8::String::NewFromUtf8(isolate, "candidate"), iceCandidate);
+    v8::Local<v8::Value> argv[argc] = { obj };
 
-    // obj->Set(String::NewFromUtf8(isolate, "sdp"),
-    //   String::NewFromUtf8(isolate, sdp.c_str(), String::kNormalString, sdp.length()));
-
-    EmitEvent("candidate", "sdp");
+    V8Helpers::CallFn(eventHandler_, argc, argv);
   });
 }
 
@@ -448,7 +289,7 @@ void Peer::OnSessionDesc(std::string type, std::string sdp) {
   INFO("EVENT_HAS_SESSION_DESC");
 
   if (type == "offer") {
-    EmitEvent("offer", sdp);
+    EmitSdpEvent("offer", sdp);
   } else if (type == "answer") {
     negotiator_->AddRemoteAnswer(sdp);
   } else {
@@ -467,20 +308,19 @@ void Peer::OnLocalOffer(webrtc::SessionDescriptionInterface* desc) {
 
   INFO("OnLocalOffer: %s", sdp.c_str());
 
-  eventLoop_.CallAsync([this, &type, &sdp](void* data) {
+  eventLoop_.CallAsync([this, type, sdp](void* data) {
     OnSessionDesc(type, sdp);
   });
 }
 
-
-void Peer::EmitEvent(const std::string &type, const std::string &sdp) {
-  INFO("EmitEvent: %s", (type + "\n" + sdp).c_str());
+void Peer::EmitSdpEvent(const std::string &type, const std::string &sdp) {
+  INFO("EmitSdpEvent: %s", type.c_str());
 
   auto isolate = v8::Isolate::GetCurrent();
   const unsigned argc = 1;
 
   auto obj = v8::Object::New(isolate);
-  obj->Set(v8::String::NewFromUtf8(isolate, "type"), V8Helpers::CoerceToV8Str(sdp));
+  obj->Set(v8::String::NewFromUtf8(isolate, "type"), V8Helpers::CoerceToV8Str(type));
   obj->Set(v8::String::NewFromUtf8(isolate, "sdp"), V8Helpers::CoerceToV8Str(sdp));
   v8::Local<v8::Value> argv[argc] = { obj };
 
