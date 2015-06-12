@@ -1,0 +1,26 @@
+TODO
+
+✔ get something building
+✔ add some basic scripts to manage WebRTC
+✔ create a simple test app to verify that the peer connection is working and is generating an offer
+✔ integrate with the prebuilt versions of WebRTC
+✔ refactor the negotiation stuff
+✔ actually implement the onSignal stuff
+✔ logging, especially for errors
+✔ refactor out and generalise the EventLoop behaviour
+✔ better tooling for managing WebRTC: prebuilts from Lumbergh
+✔ better tooling for managing WebRTC: query info about prebuilts from Lumbergh
+✔ better tooling for managing WebRTC: unit tests
+✔ better tooling for managing WebRTC: release it somehow? lumbergh-cli
+> better tooling for managing WebRTC: implement "lumbergh list"
+> better tooling for managing WebRTC: fetching and building from upstream webrtc
+> better tooling for managing WebRTC: automate depot_tools setup
+> better tooling for managing WebRTC: work out how to get the patches that we need into the prebuilt WebRTC libs
+> fix shutting down the EventLoop
+> implement the rest of the events for doing JSEP and ICE
+> implement a simple node browser app to test with
+> research how native node modules shutdown
+> setup and document debugging the module
+> create a separate target for libWebRTC if building from src
+> Error handling in general
+> Unit tests?
