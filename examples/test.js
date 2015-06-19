@@ -32,4 +32,5 @@ peer.onSignal(function(event) {
 setTimeout(function() {
   peer.close();
   peer = null;
+  MediaDevices = null;
 }, 20000);

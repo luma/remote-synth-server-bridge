@@ -57,6 +57,8 @@ class EventLoop {
   ~EventLoop();
 
   void Terminate();
+  bool isTerminating() const { return terminating_; }
+  bool isRunning() const { return !terminating_; }
 
   void Queue(AsyncEventType type, void* data = nullptr);
   void Queue(const char* type, void* data) {
@@ -86,6 +88,7 @@ class EventLoop {
   Guid Bind(Guid id, AsyncEventType type, Callback callback);
   std::string NewGuidStr();
 
+  bool terminating_;
   uv_mutex_t lock_;
   uv_async_t async_;
   uv_loop_t *loop_;

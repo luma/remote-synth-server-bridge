@@ -1,5 +1,4 @@
 #include "devices/MediaDeviceInfo.h"
-#include "common/V8.h"
 
 v8::Persistent<v8::Function> MediaDeviceInfo::constructor;
 
@@ -12,7 +11,7 @@ v8::Persistent<v8::Function> MediaDeviceInfo::constructor;
 //
 // https://developers.google.com/v8/embed
 //
-MediaDeviceInfo* GetFromPropertyCallbackInfo(const v8::PropertyCallbackInfo<v8::Value> &info) {
+MediaDeviceInfo* GetFromPropertyCallbackInfo(PropertyInfo info) {
   auto self = info.Holder();
   auto wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
   return static_cast<MediaDeviceInfo*>(wrap->Value());
@@ -115,22 +114,22 @@ v8::Local<v8::Object> MediaDeviceInfo::ToWrapped(std::string kind, const cricket
   return scope.Escape(instance);
 }
 
-void MediaDeviceInfo::GetId(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void MediaDeviceInfo::GetId(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<MediaDeviceInfo>(info.Holder())->id_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }
 
-void MediaDeviceInfo::GetKind(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void MediaDeviceInfo::GetKind(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<MediaDeviceInfo>(info.Holder())->kind_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }
 
-void MediaDeviceInfo::GetLabel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void MediaDeviceInfo::GetLabel(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<MediaDeviceInfo>(info.Holder())->label_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }
 
-void MediaDeviceInfo::GetGroupId(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void MediaDeviceInfo::GetGroupId(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<MediaDeviceInfo>(info.Holder())->groupId_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }

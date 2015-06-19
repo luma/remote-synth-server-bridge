@@ -16,9 +16,12 @@ TODO
 > better tooling for managing WebRTC: fetching and building from upstream webrtc
 > better tooling for managing WebRTC: automate depot_tools setup
 > better tooling for managing WebRTC: work out how to get the patches that we need into the prebuilt WebRTC libs
-> fix shutting down the EventLoop
+> implement DataChannels
 > implement the rest of the events for doing JSEP and ICE
 > implement a simple node browser app to test with
+> implement data channels
+> implement audio media
+> fix shutting down the EventLoop
 > research how native node modules shutdown
 > setup and document debugging the module
 > create a separate target for libWebRTC if building from src

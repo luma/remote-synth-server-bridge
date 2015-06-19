@@ -173,6 +173,7 @@
         'src/devices/MediaDeviceInfo.cpp',
         'src/negotiation/IceCandidate.cpp',
         'src/negotiation/Negotiator.cpp',
+        'src/peer/DataChannel.cpp',
         'src/peer/Peer.cpp',
         'src/SynthBridge.cpp',
       ],

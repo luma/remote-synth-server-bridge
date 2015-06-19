@@ -7,6 +7,7 @@
 #include "negotiation/IceCandidate.h"
 #include "devices/MediaDevices.h"
 #include "devices/MediaDeviceInfo.h"
+#include "peer/DataChannel.h"
 #include "peer/Peer.h"
 
 // static const char kFieldTrials[] = "";
@@ -62,6 +63,7 @@ void InitAll(v8::Handle<v8::Object> exports) {
   MediaDevices::Init(exports);
   MediaDeviceInfo::Init(exports);
   IceCandidate::Init(exports);
+  DataChannel::Init(exports);
   Peer::Init(exports);
 }
 

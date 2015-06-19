@@ -9,6 +9,8 @@
 
 typedef v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>> PersistentContext;
 typedef v8::Persistent<v8::Function, v8::CopyablePersistentTraits<v8::Function>> PersistentFunction;
+typedef const v8::FunctionCallbackInfo<v8::Value>& FunctionArgs;
+typedef const v8::PropertyCallbackInfo<v8::Value>& PropertyInfo;
 
 namespace V8Helpers {
   void CallFn(PersistentFunction fn, unsigned int argc, v8::Handle<v8::Value> argv[]);

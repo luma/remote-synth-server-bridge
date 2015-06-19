@@ -2,11 +2,19 @@
 #include <vector>
 #include "webrtc/base/common.h"
 #include "peer/Peer.h"
+#include "peer/DataChannel.h"
 #include "common/Logging.h"
 
 
 v8::Persistent<v8::Function> Peer::constructor;
 static const char kDefaultStunServer[] = "stun:stun.l.google.com:19302";
+
+Peer::FunctionInfo Peer::GetSelf(FunctionArgs args) {
+  return {
+    v8::Isolate::GetCurrent(),
+    ObjectWrap::Unwrap<Peer>(args.Holder())
+  };
+}
 
 Peer::Peer()
   : negotiator_(new Negotiator(this)),
@@ -68,16 +76,17 @@ void Peer::Init(v8::Handle<v8::Object> exports) {
   // Prototype
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "onSignal", BindToSignals);
-  // NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
-  // NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteAnswer", AddRemoteAnswer);
-  // NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteCandidate", AddRemoteCandidate);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "signal", SendSignal);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setSourceAudioDevice", SetSourceAudioDevice);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteAnswer", AddRemoteAnswer);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteCandidate", AddRemoteCandidate);
 
   constructor.Reset(isolate, tpl->GetFunction());
   exports->Set(v8::String::NewFromUtf8(isolate, "Peer"), tpl->GetFunction());
 }
 
 
-void Peer::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void Peer::New(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -95,7 +104,7 @@ void Peer::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void Peer::NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void Peer::NewInstance(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -160,7 +169,7 @@ bool Peer::CreatePeerConnection() {
   return nullptr != pc_.get();
 }
 
-void Peer::Close(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void Peer::Close(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -173,22 +182,30 @@ void Peer::Close(const v8::FunctionCallbackInfo<v8::Value>& args) {
   args.GetReturnValue().Set(v8::Undefined(isolate));
 }
 
-void Peer::BindToSignals(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  auto isolate = v8::Isolate::GetCurrent();
-  v8::HandleScope scope(isolate);
-
-  auto self = ObjectWrap::Unwrap<Peer>(args.Holder());
+void Peer::BindToSignals(FunctionArgs args) {
+  auto info = GetSelf(args);
 
   // get callback argument. It is a function; cast it to a Function and
   // store the function in a Persistent handle, since we also want that
   // to remain after this call returns
-  self->eventHandler_ = PersistentFunction::Persistent(isolate,
-                                            v8::Handle<v8::Function>::Cast(args[0]));
+  info.self->eventHandler_ = PersistentFunction::Persistent(info.isolate,
+                                      v8::Handle<v8::Function>::Cast(args[0]));
+  args.GetReturnValue().Set(args.This());
+}
+
+void Peer::SendSignal(FunctionArgs args) {
+  // auto info = GetSelf(args);
 
   args.GetReturnValue().Set(args.This());
 }
 
-void Peer::AddRemoteAnswer(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void Peer::SetSourceAudioDevice(FunctionArgs args) {
+ // auto info = GetSelf(args);
+
+  args.GetReturnValue().Set(args.This());
+}
+
+void Peer::AddRemoteAnswer(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -204,7 +221,7 @@ void Peer::AddRemoteAnswer(const v8::FunctionCallbackInfo<v8::Value>& args) {
   args.GetReturnValue().Set(args.This());
 }
 
-void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void Peer::AddRemoteCandidate(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -227,14 +244,9 @@ void Peer::AddRemoteCandidate(const v8::FunctionCallbackInfo<v8::Value>& args) {
 //
 
 void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState newState) {
-  // auto data = new StateEvent(static_cast<uint32_t>(newState));
-  // QueueEvent(Peer::EVENT_SIGNALING_STATE_CHANGE, static_cast<void*>(data));
-
   eventLoop_.CallAsync([this, newState](void* data) {
-    // auto data = static_cast<Peer::StateEvent*>(event.data);
-
-    INFO("EVENT_SIGNALING_STATE_CHANGE %s",
-      std::to_string(static_cast<uint32_t>(newState)).c_str());
+    INFO("Peer::OnSignalingChange %s",
+                std::to_string(static_cast<uint32_t>(newState)).c_str());
 
     if (webrtc::PeerConnectionInterface::kClosed == newState) {
       eventLoop_.Terminate();
@@ -252,7 +264,13 @@ void Peer::OnRemoveStream(webrtc::MediaStreamInterface* stream) {
 }
 
 void Peer::OnDataChannel(webrtc::DataChannelInterface* channel) {
-  // push into event queue
+  eventLoop_.CallAsync([this, channel](void* data) {
+    INFO("Peer::OnDataChannel");
+
+    EmitEvent("dataChannel", {
+      {"channel", DataChannel::ToWrapped(channel)}
+    });
+  });
 }
 
 void Peer::OnRenegotiationNeeded() {
@@ -289,7 +307,9 @@ void Peer::OnSessionDesc(std::string type, std::string sdp) {
   INFO("EVENT_HAS_SESSION_DESC");
 
   if (type == "offer") {
-    EmitSdpEvent("offer", sdp);
+    EmitEvent("offer", {
+      {"sdp", V8Helpers::CoerceToV8Str(sdp)}
+    });
   } else if (type == "answer") {
     negotiator_->AddRemoteAnswer(sdp);
   } else {
@@ -313,15 +333,18 @@ void Peer::OnLocalOffer(webrtc::SessionDescriptionInterface* desc) {
   });
 }
 
-void Peer::EmitSdpEvent(const std::string &type, const std::string &sdp) {
-  INFO("EmitSdpEvent: %s", type.c_str());
-
+void Peer::EmitEvent(const char* name, std::map<const char*, v8::Handle<v8::Value>> params) {
   auto isolate = v8::Isolate::GetCurrent();
-  const unsigned argc = 1;
 
   auto obj = v8::Object::New(isolate);
-  obj->Set(v8::String::NewFromUtf8(isolate, "type"), V8Helpers::CoerceToV8Str(type));
-  obj->Set(v8::String::NewFromUtf8(isolate, "sdp"), V8Helpers::CoerceToV8Str(sdp));
+  obj->Set(v8::String::NewFromUtf8(isolate, "type"),
+            v8::String::NewFromUtf8(isolate, name));
+
+  for (auto param : params) {
+    obj->Set(v8::String::NewFromUtf8(isolate, param.first), param.second);
+  }
+
+  const unsigned argc = 1;
   v8::Local<v8::Value> argv[argc] = { obj };
 
   V8Helpers::CallFn(eventHandler_, argc, argv);

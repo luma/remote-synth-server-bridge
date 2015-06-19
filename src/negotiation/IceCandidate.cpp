@@ -91,17 +91,17 @@ v8::Local<v8::Object> IceCandidate::ToWrapped(std::string sdpMid, int sdpMLineIn
   return scope.Escape(instance);
 }
 
-void IceCandidate::GetSdpMid(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void IceCandidate::GetSdpMid(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<IceCandidate>(info.Holder())->sdpMid_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }
 
-void IceCandidate::GetSdpMLineIndex(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void IceCandidate::GetSdpMLineIndex(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<IceCandidate>(info.Holder())->sdpMLineIndex_;
   info.GetReturnValue().Set(value);
 }
 
-void IceCandidate::GetCandidate(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
+void IceCandidate::GetCandidate(v8::Local<v8::String> property, PropertyInfo info) {
   auto value = ObjectWrap::Unwrap<IceCandidate>(info.Holder())->candidate_;
   info.GetReturnValue().Set(V8Helpers::CoerceToV8Str(value));
 }

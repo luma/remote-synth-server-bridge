@@ -6,6 +6,7 @@
 #include <node_object_wrap.h>
 #include <string>
 #include "talk/media/base/device.h"
+#include "common/V8.h"
 
 class MediaDeviceInfo : public node::ObjectWrap {
  public:
@@ -23,10 +24,10 @@ class MediaDeviceInfo : public node::ObjectWrap {
  private:
   static v8::Persistent<v8::Function> constructor;
 
-  static void GetId(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);
-  static void GetKind(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);
-  static void GetLabel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);
-  static void GetGroupId(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info);
+  static void GetId(v8::Local<v8::String> property, PropertyInfo info);
+  static void GetKind(v8::Local<v8::String> property, PropertyInfo info);
+  static void GetLabel(v8::Local<v8::String> property, PropertyInfo info);
+  static void GetGroupId(v8::Local<v8::String> property, PropertyInfo info);
 
   std::string id_;
   std::string kind_;

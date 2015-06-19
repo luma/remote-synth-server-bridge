@@ -17,7 +17,7 @@ namespace std {
 }
 
 EventLoop::EventLoop(const char* name)
-    : loop_(uv_default_loop()), name_(name) {
+    : terminating_(false), loop_(uv_default_loop()), name_(name) {
   uv_mutex_init(&lock_);
   uv_async_init(loop_, &async_, reinterpret_cast<uv_async_cb>(ProcessEvents));
   async_.data = this;
@@ -29,8 +29,11 @@ EventLoop::~EventLoop() {
 }
 
 void EventLoop::Terminate() {
-  INFO("%s::EventLoop:: Shutting down", name_);
-  uv_close((uv_handle_t*)(&async_), NULL);
+  if (!terminating_) {
+    terminating_ = true;
+    INFO("%s::EventLoop:: Shutting down", name_);
+    uv_close((uv_handle_t*)(&async_), NULL);
+  }
 }
 
 void EventLoop::Queue(AsyncEventType type, void* data) {
@@ -88,15 +91,16 @@ void EventLoop::CallAsync(Callback callback, void* data) {
 
 void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
   EventLoop* self = static_cast<EventLoop*>(handle->data);
-  INFO("%s::EventLoop::ProcessEvents", self->name_);
+  INFO("%s::EventLoop:: ProcessEvents", self->name_);
 
-  while (true) {
+  while (self->isRunning()) {
     AsyncEvent event;
 
     {
       UVLock uvLock(self->lock_);
 
       if (self->events_.empty()) {
+        INFO("%s::EventLoop:: Events drained", self->name_);
         break;
       }
 
@@ -110,8 +114,8 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
     auto callbacks = it->second;
 
     if (it ==  self->callbackMap_.end()) {
-      ERROR("%s::EventLoop:: Unexpected event type: %s", self->name_, event.type.c_str());
-      return;
+      ERROR("%s::EventLoop:: Unexpected event type: %s",
+                    self->name_, event.type.c_str());
     } else {
       for (auto const &callback : callbacks) {
         callback.fn(event.data);
@@ -119,7 +123,7 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
     }
   }
 
-  INFO("%s::EventLoop::ProcessEvents", self->name_);
+  INFO("%s::EventLoop:: /ProcessEvents", self->name_);
 }
 
 std::string EventLoop::NewGuidStr() {
