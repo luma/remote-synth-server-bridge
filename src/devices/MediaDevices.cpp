@@ -1,6 +1,7 @@
 #include <memory>
 #include "talk/app/webrtc/videosourceinterface.h"
 #include "webrtc/modules/audio_device/audio_device_impl.h"
+#include "talk/app/webrtc/test/fakeconstraints.h"
 #include "devices/MediaDevices.h"
 #include "common/Guid.h"
 
@@ -84,6 +85,7 @@ cricket::VideoCapturer* MediaDevices::GetVideoCapturerById(std::string deviceId)
   DeviceCollection devices;
 
   if (!GetCaptureDevices(VIDEO, &devices)) {
+    ERROR("Could not enumerate video devices!");
     // @todo probably handle this better
     return nullptr;
   }
@@ -91,6 +93,11 @@ cricket::VideoCapturer* MediaDevices::GetVideoCapturerById(std::string deviceId)
   auto it = std::find_if(devices.begin(), devices.end(), [deviceId] (const auto& device) {
     return device.id == deviceId;
   });
+
+  if (it == devices.end()) {
+    ERROR("Could not find device with the id of %s", deviceId.c_str());
+    return nullptr;
+  }
 
   return deviceManager_->CreateVideoCapturer(*it);
 }
@@ -143,8 +150,10 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> MediaDevices::GetMedia(MediaCon
     audioDevice_->InitRecording();
     audioDevice_->StartRecording();
 
+    webrtc::FakeConstraints audioConstraints;
+
     stream->AddTrack(pcFactory_->CreateAudioTrack(NewGuidStr(),
-                          pcFactory_->CreateAudioSource(nullptr)));
+                          pcFactory_->CreateAudioSource(&audioConstraints)));
   }
 
   if (videoDevice != constraints.end()) {
@@ -157,9 +166,11 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> MediaDevices::GetMedia(MediaCon
       return nullptr;
     }
 
+    webrtc::FakeConstraints videoConstraints;
+
     rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
       pcFactory_->CreateVideoTrack(NewGuidStr(),
-        pcFactory_->CreateVideoSource(capturer, nullptr)));
+        pcFactory_->CreateVideoSource(capturer, &videoConstraints)));
 
     stream->AddTrack(videoTrack);
   }
