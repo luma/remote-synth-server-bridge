@@ -18,6 +18,20 @@ MediaDevices.enumerateDevices({video: true, audio: true}, function(err, devices)
   devices.forEach(function(device) {
     renderObject(device);
   });
+
+  var constraints = {
+    video: '0x1d110000046d082d',
+    audio: '60'
+  };
+
+  MediaDevices.getMedia(constraints, function(err, mediaDevice) {
+    if (err) {
+      console.error('MediaDevices.getMedia ::', err);
+      return;
+    }
+
+    console.info('Got Media', mediaDevice);
+  });
 });
 
 // MediaDevices.on('devicesChanged', function() {

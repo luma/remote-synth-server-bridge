@@ -10,6 +10,8 @@ DataChannel::DataChannel(webrtc::DataChannelInterface* channel)
 DataChannel::~DataChannel() {
   if (channel_) channel_->UnregisterObserver();
   channel_ = nullptr;
+
+  eventLoop_.Terminate();
 }
 
 void DataChannel::Init(v8::Handle<v8::Object> exports) {
@@ -42,6 +44,7 @@ void DataChannel::New(FunctionArgs args) {
     args.GetReturnValue().Set(args.This());
   } else {
     // Invoked as plain function `DataChannel(...)`, turn into construct call.
+    // @todo argument
     const int argc = 0;
     v8::Local<v8::Value> argv[argc] = { };
     auto cons = v8::Local<v8::Function>::New(isolate, constructor);
@@ -102,7 +105,7 @@ void DataChannel::GetEventCallback(v8::Local<v8::String> property, PropertyInfo 
 
 void DataChannel::SetEventCallback(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
   auto isolate = v8::Isolate::GetCurrent();
-  v8::EscapableHandleScope scope(isolate);
+  v8::HandleScope scope(isolate);
   auto self = ObjectWrap::Unwrap<DataChannel>(info.Holder());
   auto propName = V8Helpers::CoerceFromV8Str(property);
   auto callback = PersistentFunction::Persistent(

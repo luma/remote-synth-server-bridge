@@ -5,8 +5,11 @@
 #include "webrtc/system_wrappers/interface/field_trial.h"
 #include "common/Logging.h"
 #include "negotiation/IceCandidate.h"
-#include "devices/MediaDevices.h"
 #include "devices/MediaDeviceInfo.h"
+#include "devices/MediaStreamTrack.h"
+#include "devices/MediaStream.h"
+#include "devices/MediaDevices.h"
+#include "devices/MediaDevicesWrapper.h"
 #include "peer/DataChannel.h"
 #include "peer/Peer.h"
 
@@ -60,7 +63,9 @@ void TearDownWebRtc() {
 void InitAll(v8::Handle<v8::Object> exports) {
   SetupWebRtc();
 
-  MediaDevices::Init(exports);
+  MediaStreamTrack::Init(exports);
+  MediaStream::Init(exports);
+  MediaDevicesWrapper::Init(exports);
   MediaDeviceInfo::Init(exports);
   IceCandidate::Init(exports);
   DataChannel::Init(exports);

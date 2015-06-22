@@ -66,6 +66,7 @@ class Peer
   static void AddRemoteAnswer(FunctionArgs args);
   static void AddRemoteCandidate(FunctionArgs args);
   static void AddStream(FunctionArgs args);
+  static void RemoveStream(FunctionArgs args);
 
  private:
   explicit Peer();

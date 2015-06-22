@@ -1,9 +1,10 @@
 #include <string>
 #include <vector>
 #include "webrtc/base/common.h"
-#include "peer/Peer.h"
 #include "peer/DataChannel.h"
 #include "common/Logging.h"
+#include "devices/MediaStream.h"
+#include "peer/Peer.h"
 
 
 v8::Persistent<v8::Function> Peer::constructor;
@@ -81,6 +82,7 @@ void Peer::Init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteAnswer", AddRemoteAnswer);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteCandidate", AddRemoteCandidate);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addStream", AddStream);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "removeStream", RemoveStream);
 
   constructor.Reset(isolate, tpl->GetFunction());
   exports->Set(v8::String::NewFromUtf8(isolate, "Peer"), tpl->GetFunction());
@@ -227,11 +229,19 @@ void Peer::AddStream(FunctionArgs args) {
   v8::HandleScope scope(isolate);
 
   auto self = ObjectWrap::Unwrap<Peer>(args.Holder());
-  // auto mediaStream = ObjectWrap::Unwrap<MediaStream>(args[0]);
+  auto mediaStream = ObjectWrap::Unwrap<MediaStream>(args[0]->ToObject());
+  self->pc_->AddStream(mediaStream->Value());
 
-  // self->eventLoop_.CallAsync([&self, sdp](void* data) {
-  //   self->OnSessionDesc("answer", sdp);
-  // });
+  args.GetReturnValue().Set(args.This());
+}
+
+void Peer::RemoveStream(FunctionArgs args) {
+  auto isolate = v8::Isolate::GetCurrent();
+  v8::HandleScope scope(isolate);
+
+  auto self = ObjectWrap::Unwrap<Peer>(args.Holder());
+  auto mediaStream = ObjectWrap::Unwrap<MediaStream>(args[0]->ToObject());
+  self->pc_->RemoveStream(mediaStream->Value());
 
   args.GetReturnValue().Set(args.This());
 }
