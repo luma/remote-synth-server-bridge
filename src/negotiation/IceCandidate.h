@@ -26,8 +26,8 @@ class IceCandidate : public node::ObjectWrap {
   // Node/V8 stuff
   static v8::Persistent<v8::Function> constructor;
   static void Init(v8::Handle<v8::Object> exports);
-  static void NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void NewInstance(FunctionArgs args);
+  static void New(FunctionArgs args);
 
   int GetSdpMLineIndex() { return sdpMLineIndex_; }
   std::string GetSdpMid() { return sdpMid_; }

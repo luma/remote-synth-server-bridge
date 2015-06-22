@@ -167,6 +167,7 @@
         'libraries': []
       },
       'sources': [
+        'src/common/Guid.cpp',
         'src/common/V8.cpp',
         'src/common/EventLoop.cpp',
         'src/devices/MediaDevices.cpp',

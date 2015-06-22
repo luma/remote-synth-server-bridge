@@ -45,7 +45,7 @@ void MediaDeviceInfo::Init(v8::Handle<v8::Object> exports) {
       v8::String::NewFromUtf8(isolate, "MediaDeviceInfo"), tpl->GetFunction());
 }
 
-void MediaDeviceInfo::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void MediaDeviceInfo::New(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -75,7 +75,7 @@ void MediaDeviceInfo::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void MediaDeviceInfo::NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void MediaDeviceInfo::NewInstance(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 

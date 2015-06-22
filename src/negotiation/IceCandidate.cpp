@@ -23,7 +23,7 @@ void IceCandidate::Init(v8::Handle<v8::Object> exports) {
       v8::String::NewFromUtf8(isolate, "IceCandidate"), tpl->GetFunction());
 }
 
-void IceCandidate::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void IceCandidate::New(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -54,7 +54,7 @@ void IceCandidate::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void IceCandidate::NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void IceCandidate::NewInstance(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 

@@ -1,9 +1,38 @@
+#include <memory>
+#include "talk/app/webrtc/videosourceinterface.h"
 #include "devices/MediaDevices.h"
+#include "common/Guid.h"
 #include "common/V8.h"
 
 v8::Persistent<v8::Function> MediaDevices::constructor;
 
-MediaDevices::MediaDevices() {
+MediaDevices::MediaDevices()
+  : pcWorkerThread_(new rtc::Thread()),
+    pcSignalingThread_(new rtc::Thread()) {
+
+  assert(NULL != pcSignalingThread_ && NULL != pcWorkerThread_);
+
+  pcWorkerThread_->Start();
+  pcSignalingThread_->Start();
+
+  audioDevice_ = webrtc::CreateAudioDeviceModule(0,
+                    webrtc::AudioDeviceModule::kPlatformDefaultAudio);
+
+  if (audioDevice_->Init() < 0) {
+    ERROR("Cannot create audio device module");
+    // @todo handle this better
+    return;
+  }
+
+  pcFactory_ = webrtc::CreatePeerConnectionFactory(
+          pcWorkerThread_, pcSignalingThread_, audioDevice_, nullptr, nullptr);
+
+  if (!pcFactory_.get()) {
+    ERROR("Could not create PeerConnectionFactory");
+    // @todo some crazy shit
+    return;
+  }
+
   deviceManager_.reset(cricket::DeviceManagerFactory::Create());
 
   if (false == deviceManager_->Init()) {
@@ -21,6 +50,15 @@ MediaDevices::~MediaDevices() {
   }
 
   deviceManager_ = nullptr;
+  audioDevice_ = nullptr;
+  pcFactory_ = nullptr;
+
+  pcWorkerThread_->Stop();
+  pcWorkerThread_->Quit();
+  pcSignalingThread_->Stop();
+  pcSignalingThread_->Quit();
+  delete pcWorkerThread_;
+  delete pcSignalingThread_;
 }
 
 void MediaDevices::Init(v8::Handle<v8::Object> exports) {
@@ -32,6 +70,8 @@ void MediaDevices::Init(v8::Handle<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getMedia", GetMedia);
+
 
   tpl->InstanceTemplate()->SetAccessor(
               v8::String::NewFromUtf8(isolate, "ondevicechange"),
@@ -44,7 +84,7 @@ void MediaDevices::Init(v8::Handle<v8::Object> exports) {
                tpl->GetFunction());
 }
 
-void MediaDevices::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void MediaDevices::New(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -63,7 +103,7 @@ void MediaDevices::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void MediaDevices::NewInstance(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void MediaDevices::NewInstance(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -84,10 +124,6 @@ void MediaDevices::GetOnDeviceChange(v8::Local<v8::String> property, const v8::P
 
 void MediaDevices::SetOnDeviceChange(v8::Local<v8::String> property,
       v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
-  // v8::Local<v8::Object> self = info.Holder();
-  // v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-  // void* ptr = wrap->Value();
-  // static_cast<MediaDevices*>(ptr)->onDeviceChange_ = value->Int32Value();
 
   auto isolate = v8::Isolate::GetCurrent();
   auto self = ObjectWrap::Unwrap<MediaDevices>(info.Holder());
@@ -100,7 +136,7 @@ void MediaDevices::SetOnDeviceChange(v8::Local<v8::String> property,
 }
 
 
-void MediaDevices::EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void MediaDevices::EnumerateDevices(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
 
@@ -131,47 +167,169 @@ void MediaDevices::EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& a
   args.GetReturnValue().Set(args.This());
 }
 
+//
+// MediaDevices.getMedia({
+//   video: "DeviceId", audio: "DeviceId"
+// }, function(err, mediaDevice) {
+//
+// });
+//
+void MediaDevices::GetMedia(FunctionArgs args) {
+  auto isolate = v8::Isolate::GetCurrent();
+  v8::HandleScope scope(isolate);
+
+  auto self = ObjectWrap::Unwrap<MediaDevices>(args.Holder());
+  auto types = v8::Local<v8::Object>::Cast(args[0]);
+  v8::Local<v8::Value> audioValueId = types->Get(v8::String::NewFromUtf8(isolate, "audio"));
+  v8::Local<v8::Value> videoValueId = types->Get(v8::String::NewFromUtf8(isolate, "video"));
+  auto audioDeviceId = audioValueId->IsStringObject() ? V8Helpers::CoerceFromV8Str(audioValueId->ToString()) : "";
+  auto videoDeviceId = videoValueId->IsStringObject() ? V8Helpers::CoerceFromV8Str(videoValueId->ToString()) : "";
+
+  // get callback argument. It is a function; cast it to a Function and
+  // store the function in a Persistent handle, since we also want that
+  // to remain after this call returns
+  auto callback = PersistentFunction::Persistent(isolate,
+                                    v8::Handle<v8::Function>::Cast(args[1]));
+
+  self->eventLoop_.CallAsync([
+    self, audioDeviceId, videoDeviceId,
+    callback = std::move(callback)
+  ](void* data) {
+    self->OnGetMedia(audioDeviceId, videoDeviceId, callback);
+  });
+
+  args.GetReturnValue().Set(args.This());
+}
+
+void MediaDevices::OnGetMedia(std::string audioDeviceId, std::string videoDeviceId, PersistentFunction callback) {
+  INFO("MediaDevices::OnGetMedia");
+
+  auto kAudioLabel  = NewGuidStr();
+  auto kVideoLabel  = NewGuidStr();
+  auto kStreamLabel = NewGuidStr();
+  auto stream = pcFactory_->CreateLocalMediaStream(kStreamLabel);
+
+  if (!audioDeviceId.empty()) {
+    INFO("Creating Audio track with %s device", audioDeviceId.c_str());
+
+    audioDevice_->SetRecordingDevice(atoi(audioDeviceId.c_str()));
+    audioDevice_->InitRecording();
+    audioDevice_->StartRecording();
+
+    stream->AddTrack(pcFactory_->CreateAudioTrack(kAudioLabel, nullptr));
+  }
+
+  if (!videoDeviceId.empty()) {
+    INFO("Creating Video track with %s device", videoDeviceId.c_str());
+    auto capturer = GetCapturerById(VIDEO, videoDeviceId);
+    if (capturer == nullptr) {
+      // @todo handle error
+      return;
+    }
+
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
+      pcFactory_->CreateVideoTrack(kVideoLabel,
+        pcFactory_->CreateVideoSource(capturer, nullptr))
+    );
+
+    stream->AddTrack(videoTrack);
+  }
+
+  // @todo wrap up a MediaStream for Node
+  // @todo pass it to the callback
+}
+
+cricket::VideoCapturer* MediaDevices::GetCapturerById(Type type, std::string deviceId) {
+  DeviceCollection devices;
+
+  if (!GetCaptureDevices(type, &devices)) {
+    // @todo probably handle this better
+    return nullptr;
+  }
+
+  auto it = std::find_if(devices.begin(), devices.end(), [deviceId] (const auto& device) {
+    return device.id == deviceId;
+  });
+
+  if (it == devices.end()) {
+    return nullptr;
+  }
+
+  return deviceManager_->CreateVideoCapturer(*it);
+}
+
+bool MediaDevices::GetCaptureDevices(Type type, DeviceCollection* devices) {
+  switch (type) {
+  case VIDEO:
+    if (!deviceManager_->GetVideoCaptureDevices(devices)) {
+      ERROR("Could not get media capturers for audio devices");
+      return false;
+    }
+    INFO("Got audio devices");
+    break;
+
+  case AUDIO:
+    if (!deviceManager_->GetAudioInputDevices(devices)) {
+      ERROR("Could not get media capturers for video devices");
+      return false;
+    }
+    break;
+
+  default:
+    ERROR("Could not get media capturers for unknown device type: %d", static_cast<int>(type));
+    return false;
+  }
+
+  return true;
+}
+
 void MediaDevices::OnEnumerateDevices(bool hasVideo, bool hasAudio, PersistentFunction callback) {
   INFO("MediaDevices::OnEnumerateDevices");
 
-  std::vector<cricket::Device> audioDevices;
-  std::vector<cricket::Device> videoDevices;
+  DeviceCollection audioDevices;
+  DeviceCollection videoDevices;
 
   if (hasAudio) {
     INFO("Enumerating Audio devices");
-    deviceManager_->GetAudioInputDevices(&audioDevices);
+    GetCaptureDevices(AUDIO, &audioDevices);
   }
 
   if (hasVideo) {
     INFO("Enumerating Video devices");
-    deviceManager_->GetVideoCaptureDevices(&videoDevices);
+    GetCaptureDevices(VIDEO, &videoDevices);
   }
 
   // build js friendly object
   {
-    auto isolate = v8::Isolate::GetCurrent();
+    auto devices = WrapNativeDevices(audioDevices, videoDevices);
     const unsigned argc = 2;
+    auto isolate = v8::Isolate::GetCurrent();
     // HandleScope scope(isolate);
-
-    size_t deviceIndex = 0;
-    auto devices = v8::Array::New(isolate,
-                      audioDevices.size() + videoDevices.size());
-
-    for (auto const & device: audioDevices) {
-      INFO("Audio Device: %s", device.name.c_str());
-      devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("audioinput", device));
-      deviceIndex++;
-    }
-
-    for (auto const & device: videoDevices) {
-      INFO("Video Device: %s", device.name.c_str());
-      devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("videoinput", device));
-      deviceIndex++;
-    }
-
     v8::Local<v8::Value> argv[argc] = { v8::Undefined(isolate), devices };
     V8Helpers::CallFn(callback, argc, argv);
 
     // @todo free up event?
   }
+}
+
+v8::Local<v8::Array> MediaDevices::WrapNativeDevices(DeviceCollection audio, DeviceCollection video) {
+  auto isolate = v8::Isolate::GetCurrent();
+  // HandleScope scope(isolate);
+
+  size_t deviceIndex = 0;
+  auto devices = v8::Array::New(isolate, audio.size() + video.size());
+
+  for (auto const & device: audio) {
+    INFO("Audio Device: %s", device.name.c_str());
+    devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("audioinput", device));
+    deviceIndex++;
+  }
+
+  for (auto const & device: video) {
+    INFO("Video Device: %s", device.name.c_str());
+    devices->Set(deviceIndex, MediaDeviceInfo::ToWrapped("videoinput", device));
+    deviceIndex++;
+  }
+
+  return devices;
 }

@@ -183,25 +183,6 @@ void DataChannel::OnMessage(const webrtc::DataBuffer& buffer) {
   });
 }
 
-  // auto isolate = v8::Isolate::GetCurrent();
-  // return v8::String::NewFromUtf8(
-  //           isolate, str.c_str(), v8::String::kNormalString, str.length());
-
-  // struct MessageEvent {
-  //   MessageEvent(const webrtc::DataBuffer* buffer)
-  //   {
-  //     binary = buffer.binary;
-  //     size = buffer.size();
-  //     message = new char[size];
-  //     memcpy(static_cast<void*>(message), static_cast<const void*>(buffer.data.data()), size);
-  //   }
-
-  //   bool binary;
-  //   char* message;
-  //   size_t size;
-  // };
-
-
 void DataChannel::EmitEvent(const char* type, PersistentFunction callback) {
   EmitEvent(type, callback, {});
 }

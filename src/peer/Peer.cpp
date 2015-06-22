@@ -80,6 +80,7 @@ void Peer::Init(v8::Handle<v8::Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setSourceAudioDevice", SetSourceAudioDevice);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteAnswer", AddRemoteAnswer);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addRemoteCandidate", AddRemoteCandidate);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "addStream", AddStream);
 
   constructor.Reset(isolate, tpl->GetFunction());
   exports->Set(v8::String::NewFromUtf8(isolate, "Peer"), tpl->GetFunction());
@@ -221,6 +222,20 @@ void Peer::AddRemoteAnswer(FunctionArgs args) {
   args.GetReturnValue().Set(args.This());
 }
 
+void Peer::AddStream(FunctionArgs args) {
+  auto isolate = v8::Isolate::GetCurrent();
+  v8::HandleScope scope(isolate);
+
+  auto self = ObjectWrap::Unwrap<Peer>(args.Holder());
+  // auto mediaStream = ObjectWrap::Unwrap<MediaStream>(args[0]);
+
+  // self->eventLoop_.CallAsync([&self, sdp](void* data) {
+  //   self->OnSessionDesc("answer", sdp);
+  // });
+
+  args.GetReturnValue().Set(args.This());
+}
+
 void Peer::AddRemoteCandidate(FunctionArgs args) {
   auto isolate = v8::Isolate::GetCurrent();
   v8::HandleScope scope(isolate);
@@ -253,7 +268,6 @@ void Peer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new
     }
   });
 }
-
 
 void Peer::OnAddStream(webrtc::MediaStreamInterface* stream) {
   // push into event queue

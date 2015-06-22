@@ -70,7 +70,7 @@ void EventLoop::Unbind(AsyncEventType type, Guid id) {
 }
 
 Guid EventLoop::Once(AsyncEventType type, Callback callback) {
-  auto id = guidGenerator_.newGuid();
+  auto id = NewGuid();
 
   Bind(id, type, [
     this, type, id,
@@ -108,7 +108,7 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
       self->events_.pop();
     }
 
-    INFO("%s::EventLoop:: Processing %s...", self->name_, event.type.c_str());
+    INFO("%s::EventLoop::\tProcessing %s", self->name_, event.type.c_str());
 
     auto it = self->callbackMap_.find(event.type);
     auto callbacks = it->second;
@@ -124,11 +124,4 @@ void EventLoop::ProcessEvents(uv_async_t* handle, int status) {
   }
 
   INFO("%s::EventLoop:: /ProcessEvents", self->name_);
-}
-
-std::string EventLoop::NewGuidStr() {
-  auto guid = guidGenerator_.newGuid();
-  std::stringstream stream;
-  stream << guid;
-  return stream.str();
 }

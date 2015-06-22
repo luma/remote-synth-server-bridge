@@ -13,7 +13,7 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
-#include "crossguid/guid.h"
+#include "common/Guid.h"
 
 // namespace SynthBridge {
 
@@ -66,7 +66,7 @@ class EventLoop {
   }
 
   Guid Bind(AsyncEventType type, Callback callback) {
-    return Bind(guidGenerator_.newGuid(), type, callback);
+    return Bind(NewGuid(), type, callback);
   }
   auto Bind(const char* type, Callback callback) {
     return Bind(std::string(type), callback);
@@ -86,7 +86,6 @@ class EventLoop {
  private:
   static void ProcessEvents(uv_async_t* handle, int status);
   Guid Bind(Guid id, AsyncEventType type, Callback callback);
-  std::string NewGuidStr();
 
   bool terminating_;
   uv_mutex_t lock_;
@@ -96,8 +95,6 @@ class EventLoop {
   const char *name_;
   std::queue<AsyncEvent> events_;
   std::map<std::string, Callbacks> callbackMap_;
-
-  GuidGenerator guidGenerator_;
 };
 
 // }
