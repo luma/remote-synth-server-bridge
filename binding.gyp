@@ -156,7 +156,6 @@
               '-lrtc_xmllite',
               '-lwebrtc',
               '-lwebrtc_common',
-#              '-lfield_trial',
 #              '-lfield_trial_default',
 #              '-lfattycakes',
               '-framework AppKit',

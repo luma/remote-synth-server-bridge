@@ -13,8 +13,8 @@
 #include "peer/Peer.h"
 
 void SetupWebRtc() {
-  INFO("Logger level: %s",
-          (std::to_string(rtc::LogMessage::GetMinLogSeverity())).c_str());
+  auto logLevel = rtc::LogMessage::GetMinLogSeverity();
+  INFO("Logger level: %s", std::to_string(logLevel).c_str());
 
   webrtc::InitFieldTrialsFromString("");
 
