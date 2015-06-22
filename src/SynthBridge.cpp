@@ -1,8 +1,7 @@
 #include <node.h>
 #include <string>
 #include "webrtc/base/ssladapter.h"
-// #include "webrtc/system_wrappers/interface/field_trial_default.h"
-#include "webrtc/system_wrappers/interface/field_trial.h"
+#include "common/FieldTrial.h"
 #include "common/Logging.h"
 #include "negotiation/IceCandidate.h"
 #include "devices/MediaDeviceInfo.h"
@@ -13,26 +12,11 @@
 #include "peer/DataChannel.h"
 #include "peer/Peer.h"
 
-// static const char kFieldTrials[] = "";
-
-
-
-// Clients of webrtc that do not want to configure field trials can link with
-// this instead of providing their own implementation.
-namespace webrtc {
-namespace field_trial {
-  std::string FindFullName(const std::string& name) {
-    return std::string();
-  }
-}  // namespace field_trial
-}  // namespace webrtc
-
-
 void SetupWebRtc() {
   INFO("Logger level: %s",
           (std::to_string(rtc::LogMessage::GetMinLogSeverity())).c_str());
 
-  // webrtc::field_trial::InitFieldTrialsFromString(nullptr);
+  webrtc::InitFieldTrialsFromString("");
 
   if (!rtc::InitializeSSL()) {
     ERROR("Failed to initialise SSL");

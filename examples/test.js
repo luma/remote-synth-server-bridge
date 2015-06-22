@@ -20,7 +20,7 @@ MediaDevices.enumerateDevices({video: true, audio: true}, function(err, devices)
   });
 
   var constraints = {
-    video: '0x1d110000046d082d',
+    video: '0x1a11000005ac8510',
     audio: '60'
   };
 
