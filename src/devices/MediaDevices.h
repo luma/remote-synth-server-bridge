@@ -26,12 +26,12 @@ class MediaDevices {
   };
 
   bool GetCaptureDevices(DeviceType type, DeviceCollection* devices);
-  cricket::VideoCapturer* GetCapturerById(DeviceType type, std::string deviceId);
   rtc::scoped_refptr<webrtc::MediaStreamInterface> GetMedia(MediaConstraints constraints);
 
  private:
 
   int32_t GetAudioDeviceIndex(std::string audioDeviceId);
+  cricket::VideoCapturer* GetVideoCapturerById(std::string deviceId);
 
   rtc::scoped_ptr<cricket::DeviceManagerInterface> deviceManager_;
   rtc::scoped_refptr<webrtc::AudioDeviceModule> audioDevice_;

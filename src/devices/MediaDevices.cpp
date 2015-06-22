@@ -80,10 +80,10 @@ int32_t MediaDevices::GetAudioDeviceIndex(std::string audioDeviceId) {
   return index;
 }
 
-cricket::VideoCapturer* MediaDevices::GetCapturerById(DeviceType type, std::string deviceId) {
+cricket::VideoCapturer* MediaDevices::GetVideoCapturerById(std::string deviceId) {
   DeviceCollection devices;
 
-  if (!GetCaptureDevices(type, &devices)) {
+  if (!GetCaptureDevices(VIDEO, &devices)) {
     // @todo probably handle this better
     return nullptr;
   }
@@ -92,32 +92,28 @@ cricket::VideoCapturer* MediaDevices::GetCapturerById(DeviceType type, std::stri
     return device.id == deviceId;
   });
 
-  if (it == devices.end()) {
-    return nullptr;
-  }
-
   return deviceManager_->CreateVideoCapturer(*it);
 }
 
 bool MediaDevices::GetCaptureDevices(DeviceType type, DeviceCollection* devices) {
   switch (type) {
-  case VIDEO:
-    if (!deviceManager_->GetVideoCaptureDevices(devices)) {
-      ERROR("Could not get media capturers for audio devices");
-      return false;
-    }
-    break;
+    case VIDEO:
+      if (!deviceManager_->GetVideoCaptureDevices(devices)) {
+        ERROR("Could not get media capturers for audio devices");
+        return false;
+      }
+      break;
 
-  case AUDIO:
-    if (!deviceManager_->GetAudioInputDevices(devices)) {
-      ERROR("Could not get media capturers for video devices");
-      return false;
-    }
-    break;
+    case AUDIO:
+      if (!deviceManager_->GetAudioInputDevices(devices)) {
+        ERROR("Could not get media capturers for video devices");
+        return false;
+      }
+      break;
 
-  default:
-    ERROR("Could not get media capturers for unknown device type: %d", static_cast<int>(type));
-    return false;
+    default:
+      ERROR("Could not get media capturers for unknown device type: %d", static_cast<int>(type));
+      return false;
   }
 
   return true;
@@ -154,7 +150,7 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> MediaDevices::GetMedia(MediaCon
     auto videoDeviceId = videoDevice->second;
     INFO("Creating Video track with %s device", videoDeviceId.c_str());
 
-    auto capturer = GetCapturerById(VIDEO, videoDeviceId);
+    auto capturer = GetVideoCapturerById(videoDeviceId);
     if (capturer == nullptr) {
       // @todo handle error
       return nullptr;
