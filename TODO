@@ -8,6 +8,11 @@ TODO
 ✔ actually implement the onSignal stuff
 ✔ logging, especially for errors
 ✔ refactor out and generalise the EventLoop behaviour
+✔ separate out MediaDevices internal interfaces from the object that gets exposed to JS
+✔ implement audio media
+✔ implement video media
+✔ expose a 'getUserMedia' type API
+✔ implement DataChannels
 ✔ better tooling for managing WebRTC: prebuilts from Lumbergh
 ✔ better tooling for managing WebRTC: query info about prebuilts from Lumbergh
 ✔ better tooling for managing WebRTC: unit tests
@@ -16,15 +21,13 @@ TODO
 > better tooling for managing WebRTC: fetching and building from upstream webrtc
 > better tooling for managing WebRTC: automate depot_tools setup
 > better tooling for managing WebRTC: work out how to get the patches that we need into the prebuilt WebRTC libs
-> separate out MediaDevices internal interfaces from the object that gets exposed to JS
-> implement DataChannels
 > implement the rest of the events for doing JSEP and ICE
 > implement a simple node browser app to test with
-> implement data channels
-> implement audio media
+> implement constraints for MediaDevices
+> implement modifying the SDP before it's applied/forwarded
 > fix shutting down the EventLoop
 > research how native node modules shutdown
-> setup and document debugging the module
+> document debugging the module
 > create a separate target for libWebRTC if building from src
 > Error handling in general
 > Unit tests?
