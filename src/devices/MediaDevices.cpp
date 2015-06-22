@@ -132,7 +132,8 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> MediaDevices::GetMedia(MediaCon
     auto audioDeviceId = audioDevice->second;
     auto micIndex = GetAudioDeviceIndex(audioDeviceId);
 
-    INFO("Creating Audio track with %s device (index %d)", audioDeviceId.c_str(), micIndex);
+    INFO("Creating Audio track with %s device (index %d)",
+                                  audioDeviceId.c_str(), micIndex);
 
     if (audioDevice_->SetRecordingDevice(micIndex) < 0) {
       ERROR("Could not select the recording device!");
