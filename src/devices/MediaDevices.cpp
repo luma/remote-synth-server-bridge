@@ -51,8 +51,8 @@ MediaDevices::~MediaDevices() {
   pcFactory_ = nullptr;
 
   pcWorkerThread_->Stop();
-  pcWorkerThread_->Quit();
   pcSignalingThread_->Stop();
+  pcWorkerThread_->Quit();
   pcSignalingThread_->Quit();
   delete pcWorkerThread_;
   delete pcSignalingThread_;
