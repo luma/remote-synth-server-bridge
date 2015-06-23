@@ -30,7 +30,8 @@ MediaDevices.enumerateDevices({video: true, audio: true}, function(err, devices)
       return;
     }
 
-    console.info('Got Media', mediaDevice);
+    console.info('Got Media:');
+    renderObject(mediaDevice);
   });
 });
 
@@ -39,7 +40,7 @@ MediaDevices.enumerateDevices({video: true, audio: true}, function(err, devices)
 // });
 
 peer.onSignal(function(event) {
-  console.log(event);
+  renderObject(event);
 });
 
 
